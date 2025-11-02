@@ -25,14 +25,12 @@ function openPage(pageId) {
         page.classList.remove('active');
     });
     
-    // Show selected page
+    // Show selected page, truyền vào id nhưng thêm vào class
     document.getElementById(pageId).classList.add('active');
     
     // Hide menu
     document.body.classList.add('page-active');
     
-    // Scroll to top
-    window.scrollTo(0, 0);
 }
 
 // Back to menu
@@ -44,7 +42,4 @@ function backToMenu() {
     
     // Show menu
     document.body.classList.remove('page-active');
-    
-    // Scroll to top
-    window.scrollTo(0, 0);
 }

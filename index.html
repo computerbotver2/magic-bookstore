@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -8,6 +9,10 @@
     <link rel="stylesheet" href="index_style.css">
     <script src="index_js.js" defer></script>
     <script src="customer_manager.js" defer></script>
+    <script src="donDat.js" defer></script>
+    <script src="giaban.js" defer></script>
+    <script src="tonkho.js" defer></script>
+    
 </head>
 <body>
     <!-- Main Menu -->
@@ -101,7 +106,7 @@
                         </tr>
                     </thead>
                     <tbody id="customerTable">
-                      <!--js customer_manager-->
+                      
                     </tbody>
                 </table>
             </div>
@@ -191,15 +196,44 @@
         <div class="management-container">
             <div class="page-header">
                 <h1>💰 Quản lý Giá bán</h1>
+                <p>Nhập/sửa tỷ lệ lợi nhuận và tra cứu giá bán</p>
             </div>
-            <div class="placeholder">
-                <i class='bx bx-dollar'></i>
-                <p>Trang này đang được phát triển...</p>
+    
+            <!-- Cài đặt tỷ lệ lợi nhuận -->
+            <div class="profit-setting-card">
+                <h3>⚙️ Cài đặt Tỷ lệ Lợi nhuận Mặc định</h3>
+                <div class="profit-input-group">
+                    <label>Tỷ lệ lợi nhuận (%):</label>
+                    <input type="number" id="profitRate" value="30" min="0" max="100">
+                    <button class="btn btn-primary" onclick="updateProfitRate()">
+                        <i class='bx bx-save'></i> Lưu
+                    </button>
+                </div>
+                <p class="note">Hiện tại: <strong id="currentProfitRate">30%</strong></p>
+            </div>
+
+             <!-- Bảng tra cứu giá -->
+             <div class="data-table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Mã sách</th>
+                            <th>Tên sách</th>
+                            <th>Giá vốn (₫)</th>
+                            <th>Tỷ lệ LN (%)</th>
+                            <th>Lợi nhuận (₫)</th>
+                            <th>Giá bán (₫)</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pricingTable">
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 
-    <!-- Orders Page -->
+    <!-- ========================= ORDERS PAGE - CẬP NHẬT ========================= -->
     <div class="page-content" id="orders">
         <div class="page-navbar">
             <button class="back-btn" onclick="backToMenu()">
@@ -211,32 +245,121 @@
         <div class="management-container">
             <div class="page-header">
                 <h1>🛒 Quản lý Đơn hàng</h1>
+                <p>Tra cứu và cập nhật trạng thái đơn hàng</p>
             </div>
-            <div class="placeholder">
-                <i class='bx bx-shopping-bag'></i>
-                <p>Trang này đang được phát triển...</p>
+    
+            <div class="action-bar">
+                <div class="filter-group">
+                    <input type="date" id="orderDate">
+                    <select id="orderStatus">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="pending">Chờ xử lý</option>
+                        <option value="confirmed">Đã xác nhận</option>
+                        <option value="shipping">Đang giao</option>
+                        <option value="completed">Hoàn thành</option>
+                        <option value="cancelled">Đã hủy</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="filterOrders()">
+                        <i class='bx bx-search'></i> Tìm kiếm
+                    </button>
+                </div>
+            </div>
+    
+            <div class="data-table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Mã đơn</th>
+                            <th>Khách hàng</th>
+                            <th>Ngày đặt</th>
+                            <th>Tổng tiền</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTable">
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
+    
 
-    <!-- Inventory Page -->
-    <div class="page-content" id="inventory">
-        <div class="page-navbar">
-            <button class="back-btn" onclick="backToMenu()">
-                <i class='bx bx-arrow-back'></i>
-                Quay lại Menu
-            </button>
-        </div>
-        
-        <div class="management-container">
-            <div class="page-header">
-                <h1>📊 Quản lý Tồn kho</h1>
-            </div>
-            <div class="placeholder">
-                <i class='bx bx-bar-chart-alt-2'></i>
-                <p>Trang này đang được phát triển...</p>
-            </div>
-        </div>
+   <!-- ========================= INVENTORY PAGE - CẬP NHẬT ========================= -->
+   <div class="page-content" id="inventory">
+    <div class="page-navbar">
+        <button class="back-btn" onclick="backToMenu()">
+            <i class='bx bx-arrow-back'></i>
+            Quay lại Menu
+        </button>
     </div>
+    
+    <div class="management-container">
+        <div class="page-header">
+            <h1>📊 Quản lý Tồn kho</h1>
+            <p>Tra cứu số lượng tồn và cảnh báo sắp hết hàng</p>
+        </div>
+
+        <!-- Thống kê tổng quan -->
+        <div class="inventory-stats">
+            <div class="stat-box">
+                <i class='bx bx-package'></i>
+                <div>
+                    <h3 id="totalProducts">0</h3>
+                    <p>Tổng sản phẩm</p>
+                </div>
+            </div>
+            <div class="stat-box warning">
+                <i class='bx bx-error'></i>
+                <div>
+                    <h3 id="lowStockCount">0</h3>
+                    <p>Sắp hết hàng</p>
+                </div>
+            </div>
+            <div class="stat-box success">
+                <i class='bx bx-check-circle'></i>
+                <div>
+                    <h3 id="inStockCount">0</h3>
+                    <p>Đủ hàng</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bộ lọc -->
+        <div class="action-bar">
+            <div class="filter-group">
+                <input type="date" id="inventoryFromDate">
+                <span>đến</span>
+                <input type="date" id="inventoryToDate">
+                <select id="inventoryFilter">
+                    <option value="all">Tất cả</option>
+                    <option value="low">Sắp hết hàng</option>
+                    <option value="normal">Đủ hàng</option>
+                </select>
+                <button class="btn btn-primary" onclick="filterInventory()">
+                    <i class='bx bx-search'></i> Lọc
+                </button>
+            </div>
+        </div>
+
+        <div class="data-table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Mã sách</th>
+                        <th>Tên sách</th>
+                        <th>Tồn đầu kỳ</th>
+                        <th>Nhập trong kỳ</th>
+                        <th>Xuất trong kỳ</th>
+                        <th>Tồn cuối kỳ</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody id="inventoryTable">
+                </tbody>
+            </table>
+        </div>
+</div>
+
 </body>
 </html>
