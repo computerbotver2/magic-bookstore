@@ -1,0 +1,473 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap');
+/* vô trang https://fonts.google.com/ sau đó tìm poppins -> get font -> get embed(gắn vào) code -> nhấn link/import */
+:root {
+    --primary-color: #2563eb;   /* màu icon - ô Tổng đơn hàng*/
+    --sidebar-bg: #1e293b;     /* bg: background, cái này là tránh màu trong suốt của sidebar */
+    --white: #fff;
+    --text-dark: #1e293b;
+    --text-gray: #64748b;
+    --bg-light: #f1f5f9;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --info: #06b6d4;
+    /* đây có thể là màu icon hoặc những cái khác */
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;   
+    /*font-family là định dạng kiểu chữ poppins đc gọi thông qua @import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
+    , nếu cái đầu không đc thì chuyển sang kiểu chữ kế*/
+}
+
+body {
+    background: var(--bg-light);
+}
+
+/* Sidebar - MẶC ĐỊNH ẨN */
+.sidebar {
+    position: fixed;  /*thanh có định*/
+    right: -260px; /*như vậy thanh sẽ ẩn đi bên phải, nếu 30px thì thanh sẽ di chuyển cách rìa 30px chứ kthuoc thanh k thay đổi*/ 
+    top: 0; /* làm gắn sát màn hình*/
+    width: 260px; /*con số phù hợp*/
+    height: 100%;
+    background: var(--sidebar-bg);
+    transition: all 0.3s ease;    /*giúp sideber di chuyển nhẹ nhàng*/
+    z-index: 99;   /*đảm bảo sidebar nằm đè lên trang content, số 99 là số đè lên số thấp và auto(tức là k có z-index, nên nó sẽ theo quy tắc cái nào sau đè lên cái trc)*/
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);  /*cái này làm bóng để hiện sidebar nổi hơn mà thấy k cần*/
+    overflow-y: auto; /*nếu sidebar dài hơn màn hình thì nó sẽ có thanh cuộn*/
+}
+
+/* Khi CLICK nút hamburger -> Sidebar HIỆN */
+.sidebar.open {
+    left: 0;
+}
+
+.sidebar .logo_details {
+    height: 70px;
+    display: flex;  /*giúp icon+chữ cùng dòng */
+    align-items: center; /*do flexbox sẽ canh các item ở phía trên nên ta cần cái này*/
+    padding: 0 25px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    position: sticky; /*giống fixed - dính nhưng ở vị trí nhất định trong vùng cong fixed là toàn tranh*/
+    top: 0; /*position: sticky chỉ kích hoạt chế độ dính, còn top: 0 nói cho nó biết vị trí bắt đầu dính ở đâu.*/
+    background: var(--sidebar-bg);
+    z-index: 10;
+}
+
+.sidebar .logo_details i {
+    font-size: 32px;
+    color: var(--primary-color);
+    margin-right: 15px;
+}
+
+.sidebar .logo_details .logo_name {
+    font-size: 22px;
+    font-weight: 600;  /*in đậm*/
+    color: var(--white);
+}
+
+/*không cần*/
+/* .sidebar ul {
+    padding: 10px 0 80px 0;
+} */
+
+.sidebar li {
+    list-style: none;
+    margin: 5px 0;
+}
+
+.sidebar li a {
+    display: flex;  /* cần nó vì dù i+span là inline nhưng vẫn khó căn ngang thẳng*/
+    align-items: center;
+    padding: 12px 25px;
+    text-decoration: none;  /* bỏ gạch dòng của a*/
+    color: rgba(255,255,255,0.8);
+    transition: all 0.3s ease;
+    position: relative; /*tương đối*/
+}
+
+.sidebar li a:hover, .sidebar li a.active {
+    background: var(--primary-color);
+    color: var(--white);
+    padding-left: 30px;
+}
+
+.sidebar li a i {
+    font-size: 20px;
+    min-width: 35px;
+}
+
+.sidebar li.login {
+    position: fixed;  /* lý do sticky vì sticky có thể sang ngang còn cái này thì vẫn ở đây*/
+    bottom: 0;
+    width: 260px; /* khác vs stricky, ta dùng fixed phải định nghĩa cái này*/
+    background: rgba(0,0,0,0.2);
+    padding: 15px 0;
+    border-top: 1px solid rgba(255,255,255,0.1);  /*đường viền*/
+}
+
+/* Overlay tối khi sidebar mở */
+.sidebar-overlay {
+    display: none; /* mặc định là display: none để k che phủ, nhưng xóa nó thì nó chuyển xuống dưới (block) che hết, làm k nhấp đc menu, nên phải ghi none*/
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 98;
+    transition: all 0.3s ease;
+}
+
+.sidebar-overlay.active {
+    display: block;
+}
+
+/* Main Content - LUÔN FULL WIDTH */
+.home_section {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    left: 0;
+    transition: all 0.3s ease;
+}
+
+.topbar {
+    background: var(--white);
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+
+.topbar .toggle { /*toggle là chuyển bật tắt*/
+    font-size: 28px; 
+    cursor: pointer;  /* con trỏ chuột thành tay, báo nhấp được */
+    color: var(--text-dark);
+    transition: all 0.3s ease;
+}
+
+.topbar .toggle:hover {
+    color: var(--primary-color);
+    transform: scale(1.1);  /* khi đưa con chuột nó sẽ phóng to lên 10% (cả ngang lẫn dọc x,y :1,1)*/
+}
+
+.topbar .search_wrapper {
+    flex: 1;  /*lấy phần còn trống kéo dài ra 100px*/
+    max-width: 500px;
+    margin: 0 30px;
+}
+
+.topbar .search_wrapper input {
+    width: 100%;
+    padding: 10px 15px 10px 45px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 14px;
+    transition: all 0.3s;
+}
+.user_wrapper img {
+    /* width: 45px; */
+    height: 45px;   /*chỉ cần height or width thôi vì hình ảnh là vuông nên 1 cái là đủ*/
+    border-radius: 50%;
+    /* border: 2px solid var(--primary-color); */ /*viền thôi, k có cx đc*/
+    cursor: pointer;
+}
+
+/* Content Pages */
+.page-content {
+    display: none;  /*có nó vì nếu xóa nó đi all các ô quản lý... đều ghi phía dưới hết nên phải none, giấu nó rồi dùng js để gọi cái từng phần lên*/
+}
+/*phần này liên quan đến js*/
+.page-content.active {
+    display: block;
+}
+
+/* Stats Cards */
+.card-boxes {
+    padding: 30px;
+    display: grid;      /*Sắp xếp các thẻ con theo dạng lưới*/
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /*Tự chia nhiều cột, mỗi cột tối thiểu 250px và giãn đều*/
+    gap: 25px;         /*khoảng cách giữa các ô trong lưới*/
+}
+
+.box {
+    background: var(--white);
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08); /*0: lệch ngang; 4px: lệch dọc; 15px: độ mờ; rgba(0,0,0,0.08): màu*/
+    display: flex;
+    justify-content: space-between; /*đc dùng khi có display: flex; nó nghĩa là các phần tử cách đều nhau, hai cái ngoài cùng dính mép (căn theo chiều ngang)*/
+    align-items: center; /*căn giữa theo chiều dọc*/
+    transition: transform 0.3s;
+}
+
+.box:hover {
+    transform: translateY(-5px);  /*di chuyển phần tử lên trên 5px so với vị trí ban đầu.*/
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+}
+
+.box .numbers {
+    font-size: 32px;
+    font-weight: 700;  /*độ đậm*/
+    color: var(--text-dark);
+}
+
+.box .box_topic {
+    font-size: 14px;
+    color: var(--text-gray);
+    margin-top: 5px;
+}
+
+.box i {
+    font-size: 45px;
+    opacity: 0.3;  /*độ mờ của icon*/
+}
+
+.box:nth-child(1) i { color: var(--primary-color); }  /*chọn icon <i> trong box thứ 1*/
+.box:nth-child(2) i { color: var(--success); }
+.box:nth-child(3) i { color: var(--warning); }
+.box:nth-child(4) i { color: var(--info); }
+
+/* Management Page Styles */
+.management-container {
+    padding: 30px;
+}
+
+.page-header {
+    background: var(--white);
+    padding: 25px;
+    border-radius: 15px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    /*0: lệch ngang; 2px: lệch dọc; 10px: độ mờ; rgba(0,0,0,0.05): màu*/
+}
+
+.page-header h1 {
+    font-size: 28px;
+    color: var(--text-dark);
+    margin-bottom: 10px;
+}
+
+.page-header p {
+    color: var(--text-gray);
+    font-size: 14px;
+}
+
+.action-bar { /*cái này đc thể hiện rõ chỗ quản lý sách*/
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* gap: 15px; */     /*vì có justify-content: space-between; nên gap chx thể hiện rõ*/
+    margin-bottom: 25px;
+    /* flex-wrap: wrap; */  /*cái này cho phép các ptu xuống dòng khi quá dài*/
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;  /*button là sẽ có đg viền*/
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    display: inline-flex;   /* vì có dấu + và chữ, nhưng xóa vẫn ok, chỉ thay đổi 1 chút, ghi v cho safe*/
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: var(--white);
+}
+
+.btn-primary:hover {
+    background: #1d4ed8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.filter-group {  /*cái này có thay đổi 1 chút(xóa cx k thấy rõ) nhưng nó làm input và select ngang hàng nhau*/
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filter-group select, .filter-group input {
+    padding: 10px 15px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    outline: none;  /* cái này vs dòng focus ở dưới là cùng 1 giuộc, bth thì cái này làm mất, nhưng khi nhấp vô thì nó hiện xanh do cái focus ở dưới*/
+    font-size: 14px;
+}
+
+.filter-group select:focus,
+.filter-group input:focus {
+    border-color: var(--primary-color);
+}
+
+/* Data Table */
+.data-table-container {
+    background: var(--white);
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);/*0: lệch ngang; 4px: lệch dọc; 15px: độ mờ; rgba(0,0,0,0.08): màu*/
+    overflow: hidden;  /*thanh trượt lên xuống nếu dài quá sẽ hiện*/
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;  /* Siu đẹp, chỉ dành cho table*/
+}
+
+.data-table thead {
+    background: var(--bg-light);
+}
+
+.data-table thead th {
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-dark);
+    font-size: 14px;
+}
+
+.data-table tbody td {
+    padding: 15px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 14px;
+    color: var(--text-dark);
+}
+
+.data-table tbody tr:hover {
+    background: #f8fafc;
+}
+
+.badge {
+    display: inline-block;    /*cái này sẽ cần vì cốt là mọi thứ phía dưới đã bo tròn r, nhưng nếu dữ liệu lớn hơn container thì nó cần, padding lớn hơn hoặc muốn badge căn giữa chiều dọc trong các container cao hơn thì cần cái này*/
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--white);
+}
+
+.badge.active { background: var(--success); }
+.badge.locked { background: var(--danger); }
+.badge.pending { background: var(--warning); }
+.badge.low-stock { background: var(--danger); }
+.badge.in-stock { background: var(--success); }
+
+.action-btns {  /*css của các ô trong quản lý khách hàng*/
+    display: flex;
+    gap: 5px;
+}
+
+.btn-icon {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;  /*cái này cho mượt khi rê chuột đến ô đó */
+}
+
+.btn-icon i {
+    font-size: 16px;
+}
+
+.btn-icon.view {
+    background: #e0e7ff;
+    color: var(--primary-color);
+}
+
+.btn-icon.edit {
+    background: #e0f2fe;
+    color: var(--info);
+}
+
+.btn-icon.delete {
+    background: #fee2e2;
+    color: var(--danger);
+}
+
+.btn-icon:hover {
+    transform: scale(1.1);
+}
+
+/* Alert Box */
+.alert {
+    padding: 15px 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fef3c7;
+    color: #92400e;
+    border-left: 4px solid var(--warning);
+}
+.alert i {
+    font-size: 20px;
+}
+
+/* Details Section */
+.details {
+    padding: 0 30px 30px;
+    display: grid; /* cần đi vs 2 dòng dưới*/
+    grid-template-columns: 2fr 1fr;
+    gap: 25px;
+}
+
+.card {
+    background: var(--white);
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08); /*0: lệch ngang; 4px: lệch dọc; 15px: độ mờ; rgba(0,0,0,0.08): màu*/
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* giống cây thước 20cm thẳng đứng thì vị trí 10cm là dòng chữ/icon ghi ra*/
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--bg-light);
+}
+
+.card-header h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    /*giảm cr thì box này còn kích thước cho 1 ô, cột*/
+    .card-boxes {
+        grid-template-columns: 1fr;
+    }
+    /*giảm kthuoc thì thanh tìm kiếm mất */
+    .topbar .search_wrapper {
+        display: none;
+    }
+    /*giữ lại 1 cái trong grid thôi*/
+    .details {
+        grid-template-columns: 1fr;
+    }
+    /*bảng dài quá thì cho phép cuộn NGANG (x)*/
+    .data-table-container {
+        overflow-x: auto;
+    }
+}

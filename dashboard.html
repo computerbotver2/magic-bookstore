@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <!-- cái này là để giao diện phù hợp điện thoại di động -->
+  <title>Admin - Quản lý Cửa hàng Sách</title>
+  <link href='https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css' rel='stylesheet'>  <!-- dòng này là lấy icon từ thư viện boxicon & file css này của unpkg.com -->
+  <link rel="stylesheet" href="dashboard_style.css">
+  <script src="dashboard_js.js" defer></script>    <!-- defer giúp tải JS song song nhưng là sau khi html chạy xong -->
+  <script src="customer_manager.js" defer></script>
+</head>
+<body>
+  <!-- Overlay tối khi mở sidebar -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar"> 
+    <div class="logo_details">
+      <i class='bx bx-book-open'></i>    <!-- truyền icon cuốn sách mở -->
+      <div class="logo_name">BookStore</div>
+    </div>
+    <ul>
+      <li>
+        <a href="#" class="nav-link active" data-page="dashboard">   <!-- href="#" thì mình cần, data-page="dashboard" là thuộc tính tùy chỉnh, dùng để lưu thông tin phụ cho ptu html và js có thể đọc hoặc đổi giá trị dễ dàng -->
+          <i class='bx bx-grid-alt'></i>                            
+          <span class="links_name">Tổng quan</span>     <!-- span là inline nội tuyến của html, nói chung là đi vs cái nào đều ngang hàng-->
+        </a>
+      </li>
+      <li>
+        <a href="#" class="nav-link" data-page="customers">      <!-- nav-link là liên kết thanh điều hướng (navigation)-->
+          <i class='bx bx-user'></i>
+          <span class="links_name">Quản lý Khách hàng</span>
+        </a>
+      </li>
+      <li>
+        <a href="#" class="nav-link" data-page="categories">
+          <i class='bx bx-category'></i>
+          <span class="links_name">Quản lý Loại sách</span>
+        </a>
+      </li>
+      <li>
+        <a href="#" class="nav-link" data-page="products">
+          <i class='bx bx-book'></i>
+          <span class="links_name">Quản lý Sản phẩm</span>
+        </a>
+      </li>
+      <li>
+        <a href="#" class="nav-link" data-page="imports">
+          <i class='bx bx-package'></i>
+          <span class="links_name">Quản lý Nhập hàng</span>
+        </a>
+      </li>
+      <li>
+        <a href="#" class="nav-link" data-page="pricing">
+          <i class='bx bx-dollar'></i>
+          <span class="links_name">Quản lý Giá bán</span>
+        </a>
+      </li>
+      <li>
+        <a href="#" class="nav-link" data-page="orders">
+          <i class='bx bx-shopping-bag'></i>
+          <span class="links_name">Quản lý Đơn hàng</span>
+        </a>
+      </li>
+      <li>
+        <a href="#" class="nav-link" data-page="inventory">
+          <i class='bx bx-bar-chart-alt-2'></i>
+          <span class="links_name">Quản lý Tồn kho</span>
+        </a>
+      </li>
+      <li>
+        <a href="#" class="nav-link" data-page="settings">
+          <i class='bx bx-cog'></i>
+          <span class="links_name">Cài đặt</span>
+        </a>
+      </li>
+      <li class="login">
+        <a href="#" onclick="logout(); return false;">
+          <i class='bx bx-log-out'></i>
+          <span class="links_name">Đăng xuất</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  <section class="home_section">   <!-- phần main content-->
+    <div class="topbar">        <!-- phần thanh ngang của header-->
+      <div class="toggle">        <!--chuyển bật/tắt-->
+        <i class='bx bx-menu' id="btn"></i>     <!--btn là viết tắt của button-->
+      </div>
+      <div class="search_wrapper">
+        <input type="search" placeholder="Tìm kiếm...">  <!--type="search" kiểu nhập giống text nhưng muốn tìm kiếm thì cần kết hợp js or backend, còn placeholder là chữ gợi ý hiển thị trong ô nhập.-->
+      </div>
+      <div class="user_wrapper">
+        <img src="https://ui-avatars.com/api/?name=Admin&background=2563eb&color=fff" alt="Admin">
+      </div>
+    </div>
+    <!--https://ui-avatars.com/api/   API tạo avatar động
+        name=Admin	                    Tên hiển thị → lấy chữ cái đầu (hoặc nhiều chữ cái theo length)
+        background=2563eb	              Màu nền (hex)
+        color=fff	                      Màu chữ (hex)
+        length=2	                      Số chữ cái hiện trên avatar (mặc định 2)-->
+
+    <!-- Dashboard Page -->
+    <div class="page-content active" id="dashboard">
+      <div class="card-boxes">
+        <div class="box">
+          <div class="right_side">
+            <div class="numbers">1,247</div>
+            <div class="box_topic">Tổng đơn hàng</div>
+          </div>
+          <i class='bx bx-cart-alt'></i>
+        </div>
+        <div class="box">
+          <div class="right_side">
+            <div class="numbers">₫45.6M</div>
+            <div class="box_topic">Doanh thu tháng</div>
+          </div>
+          <i class='bx bx-wallet'></i>    <!--i là là I trong inline và I trong icon-->
+        </div>
+        <div class="box">
+          <div class="right_side">
+            <div class="numbers">856</div>
+            <div class="box_topic">Sách trong kho</div>
+          </div>
+          <i class='bx bx-book'></i>
+        </div>
+        <div class="box">
+          <div class="right_side">
+            <div class="numbers">3,421</div>
+            <div class="box_topic">Khách hàng</div>
+          </div>
+          <i class='bx bx-user-plus'></i>
+        </div>
+      </div>
+
+      <div class="details">
+        <div class="card">
+          <div class="card-header">
+            <h2>📚 Sách bán chạy nhất</h2>
+          </div>
+          <div class="data-table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Tên sách</th>
+                  <th>Tác giả</th>
+                  <th>Giá</th>
+                  <th>Đã bán</th>
+                  <th>Tồn kho</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Đắc Nhân Tâm</td>
+                  <td>Dale Carnegie</td>
+                  <td>₫86,000</td>
+                  <td><strong>342</strong></td>   <!--strong làm đậm, có ý nghĩa quan trọng-->
+                  <td><span class="badge in-stock">150</span></td>  <!-- dùng span bởi vì nó inline, ô trong radius nhỏ, và chỉnh đc css, vì div thì xuống dòng, nhưng div trong td thì đc, còn td thì chiếm hết ô, còn k thì cx phải chỉnh lại width-->
+                </tr>
+                <tr>
+                  <td>Nhà Giả Kim</td>
+                  <td>Paulo Coelho</td>
+                  <td>₫79,000</td>
+                  <td><strong>298</strong></td>
+                  <td><span class="badge in-stock">200</span></td>
+                </tr>
+                <tr>
+                  <td>Sapiens</td>
+                  <td>Yuval Noah Harari</td>
+                  <td>₫189,000</td>
+                  <td><strong>256</strong></td>
+                  <td><span class="badge pending">45</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2>⚠️ Cảnh báo Tồn kho</h2>
+          </div>
+          <div class="alert warning">
+            <i class='bx bx-error'></i>
+            <div><strong>15 sản phẩm</strong> sắp hết hàng</div>
+          </div>
+          <div class="data-table-container">
+            <table class="data-table">
+              <tbody>
+                <tr>
+                  <td>Cà Phê Cùng Tony</td>
+                  <td><span class="badge low-stock">12</span></td>
+                </tr>
+                <tr>
+                  <td>Tuổi 20 Không Sợ</td>
+                  <td><span class="badge low-stock">8</span></td>
+                </tr>
+                <tr>
+                  <td>Think and Grow Rich</td>
+                  <td><span class="badge low-stock">15</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Customers Management Page -->
+    <div class="page-content" id="customers">
+      <div class="management-container">
+        <div class="page-header">
+          <h1>👥 Quản lý Khách hàng</h1>
+          <p>Quản lý thông tin và tài khoản khách hàng</p>
+        </div>
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Họ tên</th>
+                <th>Email</th>
+                <th>Số điện thoại</th>
+                <th>Mật khẩu</th>
+                <th>Ngày đăng ký</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id = "customerTable">
+              <!--js cus-->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Categories Management Page -->
+    <div class="page-content" id="categories">
+      <div class="management-container">
+        <div class="page-header">
+          <h1>📂 Quản lý Loại sách</h1>
+          <p>Thêm, sửa, xóa các danh mục loại sách</p>
+        </div>
+
+        <div class="action-bar">
+          <button class="btn btn-primary"><i class='bx bx-plus'></i> Thêm loại sách mới</button>
+          <div class="filter-group">
+            <input type="search" placeholder="Tìm kiếm loại sách...">
+          </div>
+        </div>
+
+        <div class="data-table-container">
+          <p style="padding: 50px; text-align: center; color: var(--text-gray);">
+            <i class='bx bx-category' style="font-size: 48px; display: block; margin-bottom: 15px;"></i>
+            Trang Quản lý Loại sách đang được phát triển
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Other Pages Placeholder -->
+    <div class="page-content" id="products">
+      <div class="management-container">
+        <div class="page-header">
+          <h1>📚 Quản lý Sản phẩm</h1>
+        </div>
+        <p style="padding: 50px; text-align: center; color: var(--text-gray);">Trang này đang được phát triển...</p>
+      </div>
+    </div>
+
+    <div class="page-content" id="imports">
+      <div class="management-container">
+        <div class="page-header">
+          <h1>📦 Quản lý Nhập hàng</h1>
+        </div>
+        <p style="padding: 50px; text-align: center; color: var(--text-gray);">Trang này đang được phát triển...</p>
+      </div>
+    </div>
+
+    <div class="page-content" id="pricing">
+      <div class="management-container">
+        <div class="page-header">
+          <h1>💰 Quản lý Giá bán</h1>
+        </div>
+        <p style="padding: 50px; text-align: center; color: var(--text-gray);">Trang này đang được phát triển...</p>
+      </div>
+    </div>
+
+    <div class="page-content" id="orders">
+      <div class="management-container">
+        <div class="page-header">
+          <h1>🛒 Quản lý Đơn hàng</h1>
+        </div>
+        <p style="padding: 50px; text-align: center; color: var(--text-gray);">Trang này đang được phát triển...</p>
+      </div>
+    </div>
+
+    <div class="page-content" id="inventory">
+      <div class="management-container">
+        <div class="page-header">
+          <h1>📊 Quản lý Tồn kho</h1>
+        </div>
+        <p style="padding: 50px; text-align: center; color: var(--text-gray);">Trang này đang được phát triển...</p>
+      </div>
+    </div>
+
+    <div class="page-content" id="settings">
+      <div class="management-container">
+        <div class="page-header">
+          <h1>⚙️ Cài đặt</h1>
+        </div>
+        <p style="padding: 50px; text-align: center; color: var(--text-gray);">Trang này đang được phát triển...</p>
+      </div>
+    </div>
+  </section>
+</body>
+</html

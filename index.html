@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookStore - Hệ thống quản lý</title>
+    <link href='https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="index_style.css">
+    <script src="index_js.js" defer></script>
+    <script src="customer_manager.js" defer></script>
+</head>
+<body>
+    <!-- Main Menu -->
+    <div class="menu-container" id="mainMenu">
+        <div class="menu-header">
+            <i class='bx bx-book-open'></i>
+            <h1>BookStore</h1>
+            <p>Hệ thống quản lý cửa hàng sách</p>
+        </div>
+
+        <ul class="menu-list">
+            <li class="menu-item">
+                <a class="menu-link" onclick="openPage('customers')">
+                    <i class='bx bx-user'></i>
+                    <span>Quản lý Khách hàng</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a class="menu-link" onclick="openPage('categories')">
+                    <i class='bx bx-category'></i>
+                    <span>Quản lý Loại sách</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a class="menu-link" onclick="openPage('products')">
+                    <i class='bx bx-book'></i>
+                    <span>Quản lý Sản phẩm</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a class="menu-link" onclick="openPage('imports')">
+                    <i class='bx bx-package'></i>
+                    <span>Quản lý Nhập hàng</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a class="menu-link" onclick="openPage('pricing')">
+                    <i class='bx bx-dollar'></i>
+                    <span>Quản lý Giá bán</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a class="menu-link" onclick="openPage('orders')">
+                    <i class='bx bx-shopping-bag'></i>
+                    <span>Quản lý Đơn hàng</span>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a class="menu-link" onclick="openPage('inventory')">
+                    <i class='bx bx-bar-chart-alt-2'></i>
+                    <span>Quản lý Tồn kho</span>
+                </a>
+            </li>
+      
+        <div class="menu-divider"></div>
+        <div class="logout-section">
+            <a class="logout-link" onclick="logout()">
+                <i class='bx bx-log-out'></i>
+                <span>Đăng xuất</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Customers Management Page -->
+    <div class="page-content" id="customers">
+        <div class="page-navbar">
+            <button class="back-btn" onclick="backToMenu()">
+                <i class='bx bx-arrow-back'></i>
+                Quay lại Menu
+            </button>
+        </div>
+        
+        <div class="management-container">
+            <div class="page-header">
+                <h1>👥 Quản lý Khách hàng</h1>
+                <p>Quản lý thông tin và tài khoản khách hàng</p>
+            </div>
+            
+            <div class="data-table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Họ tên</th>
+                            <th>Email</th>
+                            <th>Số điện thoại</th>
+                            <th>Mật khẩu</th>
+                            <th>Ngày đăng ký</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customerTable">
+                      <!--js customer_manager-->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Categories Management Page -->
+    <div class="page-content" id="categories">
+        <div class="page-navbar">
+            <button class="back-btn" onclick="backToMenu()">
+                <i class='bx bx-arrow-back'></i>
+                Quay lại Menu
+            </button>
+        </div>
+        
+        <div class="management-container">
+            <div class="page-header">
+                <h1>📂 Quản lý Loại sách</h1>
+                <p>Thêm, sửa, xóa các danh mục loại sách</p>
+            </div>
+
+            <div class="action-bar">
+                <button class="btn btn-primary"><i class='bx bx-plus'></i> Thêm loại sách mới</button>
+                <div class="filter-group">
+                    <input type="search" placeholder="Tìm kiếm loại sách...">
+                </div>
+            </div>
+
+            <div class="data-table-container">
+                <div class="placeholder">
+                    <i class='bx bx-category'></i>
+                    <p>Trang Quản lý Loại sách đang được phát triển</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products Page -->
+    <div class="page-content" id="products">
+        <div class="page-navbar">
+            <button class="back-btn" onclick="backToMenu()">
+                <i class='bx bx-arrow-back'></i>
+                Quay lại Menu
+            </button>
+        </div>
+        
+        <div class="management-container">
+            <div class="page-header">
+                <h1>📚 Quản lý Sản phẩm</h1>
+            </div>
+            <div class="placeholder">
+                <i class='bx bx-book'></i>
+                <p>Trang này đang được phát triển...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Imports Page -->
+    <div class="page-content" id="imports">
+        <div class="page-navbar">
+            <button class="back-btn" onclick="backToMenu()">
+                <i class='bx bx-arrow-back'></i>
+                Quay lại Menu
+            </button>
+        </div>
+        
+        <div class="management-container">
+            <div class="page-header">
+                <h1>📦 Quản lý Nhập hàng</h1>
+            </div>
+            <div class="placeholder">
+                <i class='bx bx-package'></i>
+                <p>Trang này đang được phát triển...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pricing Page -->
+    <div class="page-content" id="pricing">
+        <div class="page-navbar">
+            <button class="back-btn" onclick="backToMenu()">
+                <i class='bx bx-arrow-back'></i>
+                Quay lại Menu
+            </button>
+        </div>
+        
+        <div class="management-container">
+            <div class="page-header">
+                <h1>💰 Quản lý Giá bán</h1>
+            </div>
+            <div class="placeholder">
+                <i class='bx bx-dollar'></i>
+                <p>Trang này đang được phát triển...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders Page -->
+    <div class="page-content" id="orders">
+        <div class="page-navbar">
+            <button class="back-btn" onclick="backToMenu()">
+                <i class='bx bx-arrow-back'></i>
+                Quay lại Menu
+            </button>
+        </div>
+        
+        <div class="management-container">
+            <div class="page-header">
+                <h1>🛒 Quản lý Đơn hàng</h1>
+            </div>
+            <div class="placeholder">
+                <i class='bx bx-shopping-bag'></i>
+                <p>Trang này đang được phát triển...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inventory Page -->
+    <div class="page-content" id="inventory">
+        <div class="page-navbar">
+            <button class="back-btn" onclick="backToMenu()">
+                <i class='bx bx-arrow-back'></i>
+                Quay lại Menu
+            </button>
+        </div>
+        
+        <div class="management-container">
+            <div class="page-header">
+                <h1>📊 Quản lý Tồn kho</h1>
+            </div>
+            <div class="placeholder">
+                <i class='bx bx-bar-chart-alt-2'></i>
+                <p>Trang này đang được phát triển...</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
