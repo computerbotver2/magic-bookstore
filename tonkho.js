@@ -1,10 +1,16 @@
 // Dữ liệu tồn kho
 let inventory = [
-    { id: "SP001", name: "Đắc Nhân Tâm", opening: 100, import: 50, export: 80, closing: 70, minStock: 20 },
-    { id: "SP002", name: "Nhà Giả Kim", opening: 80, import: 40, export: 95, closing: 25, minStock: 30 },
-    { id: "SP003", name: "Sapiens", opening: 50, import: 30, export: 65, closing: 15, minStock: 20 },
-    { id: "SP004", name: "Tuổi Trẻ Đáng Giá", opening: 120, import: 60, export: 70, closing: 110, minStock: 25 },
-    { id: "SP005", name: "Cà Phê Cùng Tony", opening: 40, import: 20, export: 48, closing: 12, minStock: 15 },
+    { id: "SP001", name: "The Lumina Chronicles: Whispers of the Sunstone Oracle", opening: 100, import: 50, export: 80, closing: 70, minStock: 20 },
+    { id: "SP002", name: "The Journey of a Thousand Steps: A Life Lived in Pursuit of Dreams", opening: 80, import: 40, export: 95, closing: 25, minStock: 30 },
+    { id: "SP003", name: "Ignite Your Inner Universe: Unlock Your Potential & Create Your Reality", opening: 50, import: 30, export: 65, closing: 15, minStock: 20 },
+    { id: "SP004", name: "The Magical Treehouse Adventure: A Tale of Friendship and Flying Wishes", opening: 120, import: 60, export: 70, closing: 110, minStock: 25 },
+    { id: "SP005", name: "Stardust & Serendipity: A Love Story Written in the Stars", opening: 40, import: 20, export: 48, closing: 12, minStock: 15 },
+    { id: "SP006", name: "Whispers of the Wildflower Heart: A Timeless Romance Blossom", opening: 100, import: 50, export: 80, closing: 70, minStock: 20 },
+    { id: "SP007", name: "Echoes of Cosmos: Across the Quantum Divide", opening: 80, import: 40, export: 95, closing: 25, minStock: 30 },
+    { id: "SP008", name: "Wuthering Heights: A Novel of Passion and Vengeance", opening: 50, import: 30, export: 65, closing: 15, minStock: 20 },
+    { id: "SP009", name: "The Eldoria Chronicles: Quest for the Starfall Blade", opening: 120, import: 60, export: 70, closing: 110, minStock: 25 },
+    { id: "SP010", name: "The Silk Road Odyssey: A Nomad's Journey to the Ends of Earth", opening: 40, import: 20, export: 48, closing: 12, minStock: 15 },
+    { id: "SP011", name: "Nightmare Echoes: When the Past Haunts", opening: 40, import: 20, export: 48, closing: 12, minStock: 15 },
 ];
 
 // Hiển thị bảng tồn kho
