@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản lý đăng nhập</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background: #fff;
+      padding: 20px 40px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      width: 300px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    input[type="text"], input[type="password"], input[type="email"], input[type="tel"] {
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0 15px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      border: none;
+      border-radius: 4px;
+      background: #007bff;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    .secondary-btn {
+      background: #6c757d;
+    }
+
+    .secondary-btn:hover {
+      background: #495057;
+    }
+
+    .error {
+      color: red;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    textarea {
+      width: 100%;
+      height: 50px;
+      resize: none;
+    }
+
+    label {
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="login-container">
+    <h2>Đăng Nhập</h2>
+    <div class="error" id="login-error"></div>
+    <input type="text" id="login-username" placeholder="Tên đăng nhập">
+    <input type="password" id="login-password" placeholder="Mật khẩu">
+    <button id="login-btn">ĐĂNG NHẬP</button>
+    <button class="secondary-btn" id="goto-register">ĐĂNG KÍ</button>
+  </div>
+
+  <div class="container hidden" id="register-container">
+    <h2>Đăng Kí</h2>
+    <div class="error" id="register-error"></div>
+    <input type="text" id="register-username" placeholder="Tên đăng nhập mới">
+    <input type="password" id="register-password" placeholder="Mật khẩu">
+    <input type="password" id="register-confirm-password" placeholder="Xác nhận mật khẩu">
+    <input type="email" id="register-email" placeholder="Email">
+    <button id="register-btn">ĐĂNG KÍ</button>
+  </div>
+
+  <div class="container hidden" id="home-container">
+    <h2>Trang Chính</h2>
+    <button id="go-products">Xem Sản Phẩm</button>
+    <button id="go-info">Thông Tin Khách Hàng</button>
+    <button class="secondary-btn" id="logout-btn">ĐĂNG XUẤT</button>
+  </div>
+
+  <div class="container hidden" id="info-container">
+    <h2>Thông Tin Khách Hàng</h2>
+    <label>Tên khách hàng:</label>
+    <input type="text" id="info-username" disabled>
+    <label>Số điện thoại:</label>
+    <input type="tel" id="info-phone">
+    <label>Email:</label>
+    <input type="email" id="info-email">
+    <button id="save-info">Lưu Thông Tin</button>
+    <button id="change-password">Đổi Mật Khẩu</button>
+    <button id="view-orders">Danh Sách Mua Hàng</button>
+    <button class="secondary-btn" id="back-home">Quay Lại</button>
+
+    <div class="hidden" id="change-password-container">
+      <h3>Đổi Mật Khẩu</h3>
+      <div class="error" id="password-error"></div>
+      <input type="password" id="old-password" placeholder="Mật khẩu cũ">
+      <input type="password" id="new-password" placeholder="Mật khẩu mới">
+      <input type="password" id="confirm-new-password" placeholder="Xác nhận mật khẩu mới">
+      <button id="confirm-password-btn">Xác Nhận</button>
+    </div>
+
+    <div class="hidden" id="orders-container">
+      <h3>Danh Sách Mua Hàng</h3>
+      <ul id="orders-list"></ul>
+      <button id="close-orders">Đóng</button>
+    </div>
+  </div>
+
+  <script>
+    const loginContainer = document.getElementById('login-container');
+    const registerContainer = document.getElementById('register-container');
+    const homeContainer = document.getElementById('home-container');
+    const infoContainer = document.getElementById('info-container');
+
+    const loginError = document.getElementById('login-error');
+    const registerError = document.getElementById('register-error');
+    const passwordError = document.getElementById('password-error');
+
+    let currentUser = null;
+
+    function show(container) {
+      loginContainer.classList.add('hidden');
+      registerContainer.classList.add('hidden');
+      homeContainer.classList.add('hidden');
+      infoContainer.classList.add('hidden');
+      container.classList.remove('hidden');
+    }
+
+    // Lấy dữ liệu người dùng từ localStorage
+    function getUsers() {
+      return JSON.parse(localStorage.getItem('users') || '[]');
+    }
+
+    function saveUsers(users) {
+      localStorage.setItem('users', JSON.stringify(users));
+    }
+
+    // -------------------- Đăng nhập --------------------
+    document.getElementById('login-btn').addEventListener('click', () => {
+      const username = document.getElementById('login-username').value;
+      const password = document.getElementById('login-password').value;
+      const users = getUsers();
+
+      const user = users.find(u => u.username === username && u.password === password);
+      if (user) {
+        currentUser = user;
+        show(homeContainer);
+        loginError.textContent = '';
+      } else {
+        loginError.textContent = 'Sai thông tin đăng nhập';
+      }
+    });
+
+    document.getElementById('goto-register').addEventListener('click', () => {
+      show(registerContainer);
+      registerError.textContent = '';
+    });
+
+    // -------------------- Đăng kí --------------------
+    document.getElementById('register-btn').addEventListener('click', () => {
+      const username = document.getElementById('register-username').value;
+      const password = document.getElementById('register-password').value;
+      const confirmPassword = document.getElementById('register-confirm-password').value;
+      const email = document.getElementById('register-email').value;
+      const users = getUsers();
+
+      if (!username || !password || !confirmPassword || !email) {
+        registerError.textContent = 'Vui lòng điền đầy đủ thông tin';
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        registerError.textContent = 'Mật khẩu không khớp';
+        return;
+      }
+
+      if (users.some(u => u.username === username)) {
+        registerError.textContent = 'Tên đăng nhập đã tồn tại';
+        return;
+      }
+
+      const newUser = { username, password, email, phone: '', orders: [] };
+      users.push(newUser);
+      saveUsers(users);
+      currentUser = newUser;
+
+      registerError.textContent = '';
+      show(homeContainer);
+    });
+
+    // -------------------- Trang chính --------------------
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      currentUser = null;
+      show(loginContainer);
+    });
+
+    document.getElementById('go-products').addEventListener('click', () => {
+      window.location.href = 'sanpham.html';
+    });
+
+    document.getElementById('go-info').addEventListener('click', () => {
+      show(infoContainer);
+      loadUserInfo();
+    });
+
+    // -------------------- Thông tin khách hàng --------------------
+    function loadUserInfo() {
+      document.getElementById('info-username').value = currentUser.username;
+      document.getElementById('info-phone').value = currentUser.phone || '';
+      document.getElementById('info-email').value = currentUser.email || '';
+    }
+
+    document.getElementById('save-info').addEventListener('click', () => {
+      currentUser.phone = document.getElementById('info-phone').value;
+      currentUser.email = document.getElementById('info-email').value;
+      const users = getUsers();
+      const index = users.findIndex(u => u.username === currentUser.username);
+      users[index] = currentUser;
+      saveUsers(users);
+      alert('Đã lưu thông tin');
+    });
+
+    document.getElementById('back-home').addEventListener('click', () => {
+      show(homeContainer);
+    });
+
+    // -------------------- Đổi mật khẩu --------------------
+    document.getElementById('change-password').addEventListener('click', () => {
+      document.getElementById('change-password-container').classList.remove('hidden');
+    });
+
+    document.getElementById('confirm-password-btn').addEventListener('click', () => {
+      const oldPass = document.getElementById('old-password').value;
+      const newPass = document.getElementById('new-password').value;
+      const confirmNew = document.getElementById('confirm-new-password').value;
+
+      if (oldPass !== currentUser.password) {
+        passwordError.textContent = 'Mật khẩu cũ không đúng';
+        return;
+      }
+      if (newPass !== confirmNew) {
+        passwordError.textContent = 'Mật khẩu mới không khớp';
+        return;
+      }
+
+      currentUser.password = newPass;
+      const users = getUsers();
+      const index = users.findIndex(u => u.username === currentUser.username);
+      users[index] = currentUser;
+      saveUsers(users);
+      passwordError.textContent = '';
+      document.getElementById('change-password-container').classList.add('hidden');
+      alert('Đổi mật khẩu thành công');
+    });
+
+    // -------------------- Danh sách mua hàng --------------------
+    document.getElementById('view-orders').addEventListener('click', () => {
+      document.getElementById('orders-container').classList.remove('hidden');
+      const ordersList = document.getElementById('orders-list');
+      ordersList.innerHTML = '';
+      currentUser.orders.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = item;
+        ordersList.appendChild(li);
+      });
+    });
+
+    document.getElementById('close-orders').addEventListener('click', () => {
+      document.getElementById('orders-container').classList.add('hidden');
+    });
+  </script>
+</body>
+</html>
