@@ -102,6 +102,17 @@
 <script>
     let currentUser = null;
 
+    // ====== TỰ ĐỘNG ĐĂNG NHẬP NẾU CÓ LƯU TRƯỚC ĐÓ ======
+    window.onload = function() {
+        const savedUser = JSON.parse(localStorage.getItem("currentUser"));
+        if (savedUser) {
+            currentUser = savedUser;
+            showShop();
+        } else {
+            showLogin();
+        }
+    };
+
     function showRegister() {
         document.getElementById("loginPage").classList.add("hidden");
         document.getElementById("registerPage").classList.remove("hidden");
@@ -122,13 +133,10 @@
 
         if (found) {
             currentUser = found;
+            localStorage.setItem("currentUser", JSON.stringify(currentUser)); // 🔥 Lưu người dùng đăng nhập
             showShop();
         } else {
             document.getElementById("loginError").textContent = "Sai thông tin đăng nhập";
-            const retryBtn = document.createElement("button");
-            retryBtn.textContent = "THỬ LẠI";
-            retryBtn.onclick = showLogin;
-            document.getElementById("loginError").appendChild(retryBtn);
         }
     }
 
@@ -155,6 +163,7 @@
         storedUsers.push(newUser);
         localStorage.setItem("users", JSON.stringify(storedUsers));
         currentUser = newUser;
+        localStorage.setItem("currentUser", JSON.stringify(currentUser)); // 🔥 Lưu người đăng ký mới
         showShop();
     }
 
@@ -167,6 +176,7 @@
 
     function logout() {
         currentUser = null;
+        localStorage.removeItem("currentUser"); // 🧹 Xóa dữ liệu người dùng đang đăng nhập
         showLogin();
         document.getElementById("shopPage").classList.add("hidden");
     }
@@ -189,6 +199,7 @@
         const idx = users.findIndex(u => u.username === currentUser.username);
         users[idx] = currentUser;
         localStorage.setItem("users", JSON.stringify(users));
+        localStorage.setItem("currentUser", JSON.stringify(currentUser)); // ✅ Cập nhật cả người đang đăng nhập
 
         alert("Lưu thông tin thành công!");
     }
