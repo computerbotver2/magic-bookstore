@@ -1,10 +1,18 @@
 // Dữ liệu giá bán
 let pricingData = [
-    { id: "SP001", name: "Đắc Nhân Tâm", costPrice: 60000, profitRate: 30 },
-    { id: "SP002", name: "Nhà Giả Kim", costPrice: 55000, profitRate: 35 },
-    { id: "SP003", name: "Sapiens", costPrice: 140000, profitRate: 25 },
-    { id: "SP004", name: "Tuổi Trẻ Đáng Giá Bao Nhiêu", costPrice: 50000, profitRate: 30 },
+    { id: "SP001", name: "The Lumina Chronicles", costPrice: 120000, profitRate: 30 },
+    { id: "SP002", name: "The Journey of a Thousand Steps", costPrice: 90000, profitRate: 35 },
+    { id: "SP003", name: "Ignite Your Inner Universe", costPrice: 80000, profitRate: 25 },
+    { id: "SP004", name: "The Magical Treehouse Adventure", costPrice: 110000, profitRate: 30 },
+    { id: "SP005", name: "Stardust & Serendipity", costPrice: 70000, profitRate: 20 },
+    { id: "SP006", name: "Whispers of the Wildflower Heart", costPrice: 120000, profitRate: 30 },
+    { id: "SP007", name: "Echoes of Cosmos", costPrice: 90000, profitRate: 35 },
+    { id: "SP008", name: "Wuthering Heights", costPrice: 80000, profitRate: 25 },
+    { id: "SP009", name: "The Eldoria Chronicles", costPrice: 110000, profitRate: 30 },
+    { id: "SP010", name: "The Silk Road Odyssey", costPrice: 70000, profitRate: 20 },
+    { id: "SP011", name: "Nightmare Echoes", costPrice: 70000, profitRate: 20 },
 ];
+
 
 let defaultProfitRate = 30; // Tỷ lệ lợi nhuận mặc định
 

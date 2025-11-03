@@ -1,11 +1,31 @@
-// Dữ liệu sản phẩm
-let products = [
+// Dữ liệu sản phẩm mặc định
+const defaultProducts = [
     { id: "SP001", name: "The Lumina Chronicles", category: "Văn học", price: 150000, stock: 70, status: "active", image: "book1.jpg" },
     { id: "SP002", name: "The Journey of a Thousand Steps", category: "Kỹ năng sống", price: 120000, stock: 25, status: "active", image: "book2.jpg" },
     { id: "SP003", name: "Ignite Your Inner Universe", category: "Kỹ năng sống", price: 180000, stock: 15, status: "active", image: "book3.jpg" },
     { id: "SP004", name: "The Magical Treehouse Adventure", category: "Thiếu nhi", price: 95000, stock: 110, status: "active", image: "book4.jpg" },
     { id: "SP005", name: "Stardust & Serendipity", category: "Văn học", price: 130000, stock: 12, status: "hidden", image: "book5.jpg" },
 ];
+
+// Biến lưu trữ sản phẩm
+let products = [];
+
+// Lưu vào localStorage
+function saveToLocalStorage() {
+    localStorage.setItem('bookstore_products', JSON.stringify(products));
+}
+
+// Load từ localStorage
+function loadFromLocalStorage() {
+    const saved = localStorage.getItem('bookstore_products');
+    if (saved) {
+        products = JSON.parse(saved);
+    } else {
+        // Lần đầu tiên, dùng dữ liệu mặc định và lưu vào localStorage
+        products = [...defaultProducts];
+        saveToLocalStorage();
+    }
+}
 
 // Hiển thị danh sách sản phẩm
 function displayProducts(filteredData = products) {
@@ -26,7 +46,6 @@ function displayProducts(filteredData = products) {
         html += `<td>${statusBadge}</td>`;
         html += `<td>
                     <div class="action-btns">
-                        </button>
                         <button class="btn-icon edit" onclick="editProduct(${index})" title="Sửa">
                             <i class='bx bx-edit'></i>
                         </button>
@@ -75,6 +94,7 @@ function addProduct() {
         image: "default.jpg"
     });
     
+    saveToLocalStorage(); // Lưu vào localStorage
     displayProducts();
     alert("Đã thêm sản phẩm mới!");
 }
@@ -92,6 +112,7 @@ function editProduct(index) {
     const newStock = parseInt(prompt("Số lượng tồn:", product.stock));
     if (newStock >= 0) products[index].stock = newStock;
     
+    saveToLocalStorage(); // Lưu vào localStorage
     displayProducts();
     alert("Đã cập nhật sản phẩm!");
 }
@@ -108,15 +129,16 @@ function toggleProductStatus(index) {
     const action = product.status === 'active' ? 'ẩn' : 'hiện';
     
     if (confirm(`Bạn có chắc muốn ${action} sản phẩm "${product.name}"?`)) {
-        products[index].status = product.status === 'active' ? 'hidden' : 'active';
+        products[index].status = products[index].status === 'active' ? 'hidden' : 'active';
+        saveToLocalStorage(); // Lưu vào localStorage
         displayProducts();
     }
 }
 
-
 // Khởi tạo
 document.addEventListener('DOMContentLoaded', function() {
     if (document.getElementById('productsTable')) {
+        loadFromLocalStorage(); // Load dữ liệu từ localStorage
         displayProducts();
     }
 });
