@@ -12,6 +12,9 @@
     <script src="donDat.js" defer></script>
     <script src="giaban.js" defer></script>
     <script src="tonkho.js" defer></script>
+    <script src="nhaphang.js" defer></script>
+    <script src="sanpham.js" defer></script>
+    <script src="loaisach.js" defer></script>
     
 </head>
 <body>
@@ -113,76 +116,138 @@
         </div>
     </div>
 
-    <!-- Categories Management Page -->
-    <div class="page-content" id="categories">
-        <div class="page-navbar">
-            <button class="back-btn" onclick="backToMenu()">
-                <i class='bx bx-arrow-back'></i>
-                Quay lại Menu
+   <!-- Categories Management Page -->
+<div class="page-content" id="categories">
+    <div class="page-navbar">
+        <button class="back-btn" onclick="backToMenu()">
+            <i class='bx bx-arrow-back'></i>
+            Quay lại Menu
+        </button>
+    </div>
+    
+    <div class="management-container">
+        <div class="page-header">
+            <h1>📂 Quản lý Loại sách</h1>
+            <p>Thêm, sửa, ẩn/hiện các danh mục loại sách</p>
+        </div>
+
+        <div class="action-bar">
+            <button class="btn btn-primary" onclick="addCategory()">
+                <i class='bx bx-plus'></i> Thêm loại sách mới
             </button>
         </div>
-        
-        <div class="management-container">
-            <div class="page-header">
-                <h1>📂 Quản lý Loại sách</h1>
-                <p>Thêm, sửa, xóa các danh mục loại sách</p>
-            </div>
 
-            <div class="action-bar">
-                <button class="btn btn-primary"><i class='bx bx-plus'></i> Thêm loại sách mới</button>
-                <div class="filter-group">
-                    <input type="search" placeholder="Tìm kiếm loại sách...">
-                </div>
-            </div>
-
-            <div class="data-table-container">
-                <div class="placeholder">
-                    <i class='bx bx-category'></i>
-                    <p>Trang Quản lý Loại sách đang được phát triển</p>
-                </div>
-            </div>
+        <div class="data-table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Mã loại</th>
+                        <th>Tên loại sách</th>
+                        <th>Mô tả</th>
+                        <th>Số sản phẩm</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="categoriesTable">
+                </tbody>
+            </table>
         </div>
     </div>
+</div>
 
-    <!-- Products Page -->
-    <div class="page-content" id="products">
-        <div class="page-navbar">
-            <button class="back-btn" onclick="backToMenu()">
-                <i class='bx bx-arrow-back'></i>
-                Quay lại Menu
+<!-- Products Page -->
+<div class="page-content" id="products">
+    <div class="page-navbar">
+        <button class="back-btn" onclick="backToMenu()">
+            <i class='bx bx-arrow-back'></i>
+            Quay lại Menu
+        </button>
+    </div>
+    
+    <div class="management-container">
+        <div class="page-header">
+            <h1>📚 Quản lý Sản phẩm</h1>
+            <p>Thêm, sửa, ẩn/hiện sản phẩm</p>
+        </div>
+
+        <div class="action-bar">
+            <button class="btn btn-primary" onclick="addProduct()">
+                <i class='bx bx-plus'></i> Thêm sản phẩm mới
             </button>
         </div>
-        
-        <div class="management-container">
-            <div class="page-header">
-                <h1>📚 Quản lý Sản phẩm</h1>
-            </div>
-            <div class="placeholder">
-                <i class='bx bx-book'></i>
-                <p>Trang này đang được phát triển...</p>
-            </div>
+
+        <div class="data-table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Mã SP</th>
+                        <th>Tên sản phẩm</th>
+                        <th>Loại sách</th>
+                        <th>Giá bán</th>
+                        <th>Tồn kho</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="productsTable">
+                </tbody>
+            </table>
         </div>
     </div>
-
+</div>
     <!-- Imports Page -->
-    <div class="page-content" id="imports">
-        <div class="page-navbar">
-            <button class="back-btn" onclick="backToMenu()">
-                <i class='bx bx-arrow-back'></i>
-                Quay lại Menu
-            </button>
+<div class="page-content" id="imports">
+    <div class="page-navbar">
+        <button class="back-btn" onclick="backToMenu()">
+            <i class='bx bx-arrow-back'></i>
+            Quay lại Menu
+        </button>
+    </div>
+    
+    <div class="management-container">
+        <div class="page-header">
+            <h1>📦 Quản lý Nhập hàng</h1>
+            <p>Hiển thị, tìm kiếm và quản lý phiếu nhập hàng</p>
         </div>
-        
-        <div class="management-container">
-            <div class="page-header">
-                <h1>📦 Quản lý Nhập hàng</h1>
+
+        <div class="action-bar">
+            <button class="btn btn-primary" onclick="addImportOrder()">
+                <i class='bx bx-plus'></i> Tạo phiếu nhập mới
+            </button>
+            <div class="filter-group">
+                <input type="date" id="importDate">
+                <select id="importStatus">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="pending">Chờ nhập</option>
+                    <option value="completed">Đã hoàn thành</option>
+                    <option value="cancelled">Đã hủy</option>
+                </select>
+                <button class="btn btn-primary" onclick="filterImportOrders()">
+                    <i class='bx bx-search'></i> Tìm kiếm
+                </button>
             </div>
-            <div class="placeholder">
-                <i class='bx bx-package'></i>
-                <p>Trang này đang được phát triển...</p>
-            </div>
+        </div>
+
+        <div class="data-table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Mã phiếu</th>
+                        <th>Nhà cung cấp</th>
+                        <th>Ngày nhập</th>
+                        <th>Số sản phẩm</th>
+                        <th>Tổng tiền</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="importOrdersTable">
+                </tbody>
+            </table>
         </div>
     </div>
+</div>
 
     <!-- Pricing Page -->
     <div class="page-content" id="pricing">
