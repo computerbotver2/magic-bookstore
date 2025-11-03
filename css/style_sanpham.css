@@ -24,11 +24,60 @@
     width:48px;height:48px;border-radius:8px;background:linear-gradient(135deg,#fff2,#ffffff10);display:grid;place-items:center;
     box-shadow: 0 6px 20px rgba(0,0,0,0.06);
   }
-  .search-row{display:flex;gap:12px;align-items:center;margin-top:14px;flex-wrap:wrap;justify-content:center}
-  .search-row input[type="text"], .search-row select, .search-row input[type="number"]{
-    padding:10px 12px;border-radius:8px;border:0;min-width:160px;
-    box-shadow: 0 4px 14px rgba(14,30,60,0.06);
+
+  /* ================================== */
+  /* === KHU VỰC ĐÃ CẬP NHẬT (CSS) === */
+  /* ================================== */
+
+  .search-row{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    margin-top:14px;
+    flex-wrap:wrap; /* Vẫn giữ wrap cho responsive */
+    justify-content:center;
   }
+  
+  /* Bỏ min-width, thêm cài đặt flex cơ bản */
+  .search-row input[type="text"], 
+  .search-row select, 
+  .search-row input[type="number"]{
+    padding:10px 12px;
+    border-radius:8px;
+    border:0;
+    box-shadow: 0 4px 14px rgba(14,30,60,0.06);
+    flex: 1 1 auto; /* Cho phép co giãn */
+    min-width: 140px; /* Đặt min-width nhỏ hơn để wrap đẹp hơn */
+  }
+
+  /* Tùy chỉnh độ co giãn cho từng loại */
+  /* Ô tìm tên/tác giả: co giãn nhiều */
+  .search-row input[type="text"] {
+    flex-grow: 1;
+    flex-basis: 180px; /* Độ rộng cơ sở */
+  }
+
+  /* Ô chọn: co giãn vừa phải */
+  .search-row select {
+    flex-grow: 1;
+    flex-basis: 160px;
+  }
+
+  /* Ô giá: co giãn ít */
+  .search-row input[type="number"] {
+    flex-grow: 1;
+    flex-basis: 140px;
+    max-width: 150px; /* Giới hạn để không quá to */
+  }
+
+  /* Nút: không co giãn */
+  .search-row button {
+    flex-shrink: 0;
+  }
+  /* ================================== */
+  /* === KẾT THÚC CẬP NHẬT === */
+  /* ================================== */
+
   .search-row button{
     padding:10px 16px;border-radius:8px;border:0;background:#2ecc71;color:white;cursor:pointer;font-weight:600;
     box-shadow: 0 6px 18px rgba(0,0,0,0.08);
