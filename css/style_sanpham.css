@@ -1,0 +1,216 @@
+/* --- CÀI ĐẶT CHUNG --- */
+* {
+    box-sizing: border-box; /* Tốt! Giữ nguyên */
+}
+
+body {
+    margin: 0px;
+    padding: 0px;
+    font-family: Arial, sans-serif; /* Thêm font chữ cơ bản */
+    background-color: #f9f6f2; /* Nền be nhạt cho đẹp hơn bisque */
+}
+
+/* * Sửa .container để nó căn giữa trang
+ * và không bị dính sát vào lề trên màn hình lớn
+*/
+.container {
+    max-width: 1200px;  /* Đặt chiều rộng tối đa */
+    margin: 0 auto;     /* Tự động căn giữa (trái/phải) */
+    padding: 0 20px;    /* Thêm đệm 2 bên để không dính lề */
+}
+
+/* --- 1. HEADER --- */
+#header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around; /* Đẩy các mục ra xa nhau */
+    align-items: center;          /* Căn giữa theo chiều dọc */
+    padding: 20px 0;
+    background-color: white;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+#header .logo h4 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+/* * Sửa search-bar:
+ * - Bỏ 'position: absolute'
+ * - Dùng 'flex-grow: 1' để nó tự lấp đầy không gian trống ở giữa
+*/
+#header .search-bar {
+    flex-grow: 1;     /* Đây là chìa khóa! */
+    max-width: 500px;
+    margin: 0 30px;   /* Khoảng cách với logo và menu */
+    position: relative; /* Giữ lại để định vị icon tìm kiếm */
+}
+
+#header .search-bar input {
+    width: 100%;
+    padding: 12px 20px 12px 45px;
+    border: none;
+    background-color: #f4f4f4;
+    border-radius: 12px;
+    font-size: 1rem;
+}
+
+#header .search-bar .fa-magnifying-glass {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+}
+#header .header-menu i:hover{
+    color: #c0392b;
+}
+
+/* Thêm CSS cho .header-menu mà bạn chưa có */
+.header-menu {
+    display: flex;
+    gap: 30px; /* Khoảng cách giữa các icon */
+}
+.header-menu i {
+    font-size: 1.4rem;
+    cursor: pointer;
+}
+
+/* Thiết lập cho cả thanh menu */
+#top-menu {
+    width: 100%; /* Kéo dài hết chiều ngang */
+    background-color: #ffffff; /* Nền trắng (hoặc màu bạn muốn) */
+    /* Chỉ giữ 1 đường viền ở dưới để phân cách với nội dung */
+    border-bottom: 1px solid #e0e0e0; 
+}
+
+#top-menu ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+#top-menu ul li {
+    display: inline-block; /* Xếp các mục hàng ngang */
+    /* Bỏ border và padding ở đây */
+}
+
+/* Đây là phần quan trọng nhất: tạo kiểu cho chính các link */
+#top-menu ul li a {
+    display: inline-block; /* Để padding hoạt động */
+    padding: 16px 24px;   /* Tăng đệm cho rộng rãi, đẹp hơn */
+    
+    text-decoration: none;  /* Bỏ gạch chân của link */
+    color: #333;           /* Đổi màu chữ thành xám đậm (đẹp hơn đen) */
+    
+    font-size: 16px;      /* Cỡ chữ to rõ ràng */
+    font-weight: 500;     /* Hơi đậm một chút */
+
+    /* Hiệu ứng chuyển động mượt mà khi hover */
+    transition: all 0.3s ease; 
+}
+
+/* Thêm hiệu ứng khi di chuột vào */
+#top-menu ul li a:hover {
+    background-color: #f5f5f5; /* Đổi màu nền 1 chút */
+    color: #000;               /* Đổi màu chữ thành đen */
+}
+/* --- 2. CONTENT --- */
+#content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+#product-grid{
+    background-color: transparent;
+
+    display: flex;
+    flex-wrap: wrap;
+
+    
+    gap: 20px;      /* Giữ nguyên gap của bạn */
+    padding: 40px 0; /* Thêm padding trên/dưới cho đẹp */
+}
+
+/* --- 3. PRODUCT CARD --- */
+#product-grid a{
+    width: calc(25% - 15px);
+    text-decoration: none;
+}
+.product-card {
+    background-color: white;
+    /* BỎ width: calc(...) vì Grid đã tự lo việc này */
+    border-radius: 8px;
+    text-align: left; /* Căn trái cho đẹp hơn */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Thêm bóng mờ */
+    overflow: hidden; /* Để bo góc ảnh */
+    transition: transform 0.3s;
+}
+
+.product-card:hover {
+    transform: translateY(-5px); /* Hiệu ứng nhấc lên khi hover */
+}
+
+.product-card img {
+    max-width: 100%; /* Giữ nguyên */
+    height: 300px;      /* Thêm chiều cao cố định */
+    object-fit: cover;  /* Đảm bảo ảnh lấp đầy, không bị méo */
+    display: block;
+    /* Bỏ border-radius ở đây vì đã có overflow: hidden ở card */
+}
+
+.product-card .information {
+    margin: 0;      /* Bỏ margin, dùng padding */
+    padding: 20px;  /* Dùng padding cho đẹp */
+}
+
+.product-card .information h4 {
+    margin: 0 0 5px 0;
+    font-size: 1.1rem;
+}
+
+.product-card .information p {
+    margin: 4px 0;
+    font-size: 0.9rem;
+    color: #777;
+}
+
+.product-card .information p:last-child {
+    font-weight: 700;
+    color: #c0392b; /* Màu đỏ cho giá */
+    font-size: 1.1rem;
+    margin-top: 10px;
+}
+
+/* ---pagination ----*/
+#pagination{
+    text-align: center;
+}
+#pagination button{
+    display: inline-block;
+    padding: 10px 15px;
+    margin: 0 5px;
+    border: 3px solid black;
+    text-decoration: none;
+    color: black;
+    cursor: pointer;
+}
+#pagination button:hover,
+#pagination .active{
+    background-color: black;
+    color: white;
+}
+/* --- 4. FOOTER --- */
+#footer {
+    padding: 40px;
+    margin-top: 20px;
+    text-align: center;
+    background-color: white;
+    border-top: 1px solid #e0e0e0;
+    color: #888;
+}
+@media only screen and (max-width: 750px){
+    #product-grid a{
+        width: calc(50% - 10px);
+    }
+}

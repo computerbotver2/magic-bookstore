@@ -1,0 +1,250 @@
+/* --- CÀI ĐẶT CHUNG --- */
+* {
+    box-sizing: border-box; /* Tốt! Giữ nguyên */
+}
+
+body {
+    margin: 0px;
+    padding: 0px;
+    font-family: Arial, sans-serif; /* Thêm font chữ cơ bản */
+    background-color: #f9f6f2; /* Nền be nhạt cho đẹp hơn bisque */
+}
+
+/* * Sửa .container để nó căn giữa trang
+ * và không bị dính sát vào lề trên màn hình lớn
+*/
+.container {
+    max-width: 1200px;  /* Đặt chiều rộng tối đa */
+    margin: 0 auto;     /* Tự động căn giữa (trái/phải) */
+    padding: 0 20px;    /* Thêm đệm 2 bên để không dính lề */
+}
+#page-wapper{
+    background-color: white;
+}
+/* --- 1. HEADER --- */
+#header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around; /* Đẩy các mục ra xa nhau */
+    align-items: center;          /* Căn giữa theo chiều dọc */
+    padding: 20px 0;
+    background-color: white;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+#header .logo h4 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+/* * Sửa search-bar:
+ * - Bỏ 'position: absolute'
+ * - Dùng 'flex-grow: 1' để nó tự lấp đầy không gian trống ở giữa
+*/
+#header .search-bar {
+    flex-grow: 1;     /* Đây là chìa khóa! */
+    max-width: 500px;
+    margin: 0 30px;   /* Khoảng cách với logo và menu */
+    position: relative; /* Giữ lại để định vị icon tìm kiếm */
+}
+
+#header .search-bar input {
+    width: 100%;
+    padding: 12px 20px 12px 45px;
+    border: none;
+    background-color: #f4f4f4;
+    border-radius: 12px;
+    font-size: 1rem;
+}
+
+#header .search-bar .fa-magnifying-glass {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+}
+#header .header-menu i:hover{
+    color: #c0392b;
+}
+
+/* Thêm CSS cho .header-menu mà bạn chưa có */
+.header-menu {
+    display: flex;
+    gap: 30px; /* Khoảng cách giữa các icon */
+}
+.header-menu i {
+    font-size: 1.4rem;
+}
+/*--menu--*/
+/* Thiết lập cho cả thanh menu */
+#top-menu {
+    width: 100%; /* Kéo dài hết chiều ngang */
+    background-color: #ffffff; /* Nền trắng (hoặc màu bạn muốn) */
+    /* Chỉ giữ 1 đường viền ở dưới để phân cách với nội dung */
+    border-bottom: 1px solid #e0e0e0; 
+}
+
+#top-menu ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+#top-menu ul li {
+    display: inline-block; /* Xếp các mục hàng ngang */
+    /* Bỏ border và padding ở đây */
+}
+
+/* Đây là phần quan trọng nhất: tạo kiểu cho chính các link */
+#top-menu ul li a {
+    display: inline-block; /* Để padding hoạt động */
+    padding: 16px 24px;   /* Tăng đệm cho rộng rãi, đẹp hơn */
+    
+    text-decoration: none;  /* Bỏ gạch chân của link */
+    color: #333;           /* Đổi màu chữ thành xám đậm (đẹp hơn đen) */
+    
+    font-size: 16px;      /* Cỡ chữ to rõ ràng */
+    font-weight: 500;     /* Hơi đậm một chút */
+
+    /* Hiệu ứng chuyển động mượt mà khi hover */
+    transition: all 0.3s ease; 
+}
+
+/* Thêm hiệu ứng khi di chuột vào */
+#top-menu ul li a:hover {
+    background-color: #f5f5f5; /* Đổi màu nền 1 chút */
+    color: #000;               /* Đổi màu chữ thành đen */
+}
+/*--- thông tin sản phẩm--*/
+/*-ảnh-*/
+#content{
+    padding-top: 40px;
+}
+#product-main{
+    display: flex;
+    flex-direction: row;
+    gap: 50px;
+    margin: 20px;
+}
+.img-main{
+    width: 25%;
+}
+#product-main img{
+    max-width: 100%;
+    height: 300px;
+    display: block;
+}
+/*thông tin*/
+#product-information h1{
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+#product-information .author{
+    font-size: 1.1rem;
+    color: #555;
+    font-weight: 500;
+    margin-bottom: 20px;
+}
+#product-information .price{
+    font-weight: 700;
+    color: #c0392b;
+    font-size: 2.4rem;
+    margin-top: 50px;
+    margin-bottom: 0px;
+}
+
+#product-information .btn-add-to-cart{
+    padding: 15px 30px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    background-color: #3498db; /* Màu xanh dương */
+    color: white;
+}
+#product-information .btn-add-to-cart:hover{
+    background-color: #2980b9;
+}
+/* --- CSS CHO Ô SỐ LƯỢNG --- */
+
+/* 1. Dùng flexbox để căn chỉnh các phần tử (chữ, nút, input)
+      nằm ngang và thẳng hàng */
+.input-quantity {
+    display: flex;
+    align-items: center; /* Căn giữa các item theo chiều dọc */
+}
+
+/* 2. Style cho chữ "Số lượng :" */
+.input-quantity p {
+    margin-right: 8px;
+    font-weight: bold; 
+}
+
+/* 3. Style chung cho cả nút và input */
+.input-quantity .btn-quantity,
+.input-quantity #quantity {
+    height: 38px; 
+    border: 1px solid #aaa;
+    background-color: white;
+    padding: 0;
+    margin: 0; 
+    vertical-align: middle; /* Đảm bảo căn thẳng hàng */
+}
+
+/* 4. Style riêng cho 2 nút Bấm (+ và -) */
+.input-quantity .btn-quantity {
+    width: 38px; 
+    font-size: 1.3rem; 
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* 5. Style riêng cho ô input ở giữa */
+.input-quantity #quantity {
+    width: 100px; 
+    text-align: center; 
+    font-size: 1.1rem;
+}
+
+.input-quantity #quantity {
+    margin-left: -1px; 
+}
+
+.input-quantity .btn2 {
+    margin-left: -1px;
+}
+/* --- 4. MÔ TẢ SẢN PHẨM --- */
+#Description {
+    margin-top: 60px;     /* 1. Tạo khoảng cách lớn (60px) với khối thông tin sản phẩm bên trên */
+    padding-top: 40px;    /* 2. Tạo khoảng cách bên trong (40px) từ đường kẻ đến chữ "Mô tả" */
+    
+    /* 3. Thêm một đường kẻ mỏng ở trên để phân tách 2 khu vực rõ ràng */
+    border-top: 1px solid #e0e0e0; 
+}
+
+#Description h1 {
+    font-size: 1.8rem;    /* Cho tiêu đề "Mô tả" nhỏ hơn tiêu đề sách một chút */
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 20px;  /* Khoảng cách từ tiêu đề "Mô tả" đến nội dung bên dưới */
+}
+
+#Description p {
+    font-size: 1rem;        /* Cỡ chữ 16px, dễ đọc */
+    line-height: 1.6;       /* QUAN TRỌNG: Giãn dòng cho thoáng, dễ đọc hơn */
+    color: #555;           /* Màu chữ xám đậm, dễ nhìn hơn màu đen thuần */
+    margin-bottom: 16px;    /* Phòng trường hợp bạn có nhiều đoạn mô tả */
+}
+#footer {
+    padding: 40px;
+    margin-top: 20px;
+    text-align: center;
+    background-color: white;
+    border-top: 1px solid #e0e0e0;
+    color: #888;
+}

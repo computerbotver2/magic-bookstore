@@ -1,0 +1,309 @@
+/* --- CÀI ĐẶT CHUNG --- */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0px;
+    padding: 0px;
+    font-family: Arial, sans-serif;
+    background-color: #f9f6f2;
+}
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+#page-wapper{
+    background-color: white;
+}
+
+/* --- 1. HEADER (Giữ nguyên) --- */
+#header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    padding: 20px 0;
+    background-color: white;
+    border-bottom: 1px solid #e0e0e0;
+}
+#header .logo h4 { margin: 0; font-size: 1.5rem; }
+#header .search-bar {
+    flex-grow: 1;
+    max-width: 500px;
+    margin: 0 30px;
+    position: relative;
+}
+#header .search-bar input {
+    width: 100%;
+    padding: 12px 20px 12px 45px;
+    border: none;
+    background-color: #f4f4f4;
+    border-radius: 12px;
+    font-size: 1rem;
+}
+#header .search-bar .fa-magnifying-glass {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+}
+#header .header-menu i:hover{ color: #c0392b; }
+.header-menu { display: flex; gap: 30px; }
+.header-menu i { font-size: 1.4rem; cursor: pointer; }
+
+/* --- 2. TOP-MENU (Giữ nguyên) --- */
+#top-menu {
+    width: 100%;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e0e0e0; 
+}
+#top-menu ul { margin: 0; padding: 0; list-style: none; }
+#top-menu ul li { display: inline-block; }
+#top-menu ul li a {
+    display: inline-block;
+    padding: 16px 24px;
+    text-decoration: none;
+    color: #333;
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.3s ease; 
+}
+#top-menu ul li a:hover {
+    background-color: #f5f5f5;
+    color: #000;
+}
+
+/* =====================================================
+    3. CSS MỚI CHO TRANG GIỎ HÀNG
+=====================================================
+*/
+
+#cart-page {
+    padding-top: 40px;
+    padding-bottom: 60px;
+}
+
+#cart-page h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+/* Dùng flexbox để chia layout 2 cột */
+.cart-layout {
+    display: flex;
+    flex-wrap: wrap; /* Cho phép xuống hàng trên di động */
+    gap: 30px;
+}
+
+/* --- 3.1 CỘT TRÁI (DANH SÁCH SẢN PHẨM) --- */
+.cart-items-list {
+    flex: 2; /* Chiếm 2/3 không gian */
+    min-width: 600px; /* Độ rộng tối thiểu */
+}
+
+.cart-items-list table {
+    width: 100%;
+    border-collapse: collapse; /* Gộp đường viền
+    bảng */
+}
+
+.cart-items-list th, 
+.cart-items-list td {
+    padding: 16px 8px;
+    border-bottom: 1px solid #e0e0e0;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.cart-items-list th {
+    color: #555;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+/* Căn chỉnh độ rộng các cột */
+.col-product { width: 45%; }
+.col-price { width: 15%; }
+.col-quantity { width: 20%; }
+.col-total { width: 15%; }
+.col-remove { width: 5%; text-align: center; }
+
+
+/* Style cho ô "Sản phẩm" */
+.cart-item-product {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.cart-item-product img {
+    width: 80px;
+    height: auto; /* Giữ tỷ lệ */
+    border-radius: 4px;
+    border: 1px solid #eee;
+}
+
+.cart-item-product .info .name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #000;
+    margin: 0;
+}
+.cart-item-product .info .author {
+    font-size: 0.9rem;
+    color: #777;
+    margin: 4px 0 0 0;
+}
+
+/* Style cho ô "Đơn giá" và "Thành tiền" */
+.cart-item-price, .cart-item-total {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #c0392b; /* Màu đỏ */
+}
+
+/* Style cho ô "Xóa" */
+.cart-item-remove i{
+    color: #888;
+    font-size: 1.2rem;
+    text-decoration: none;
+    transition: color 0.3s;
+    cursor: pointer;
+}
+.cart-item-remove i:hover {
+    color: #c0392b; /* Màu đỏ */
+}
+
+/* --- 3.2 CSS CHO Ô SỐ LƯỢNG (Tái sử dụng) --- */
+.input-quantity {
+    display: flex;
+    align-items: center;
+}
+.input-quantity .btn-quantity,
+.input-quantity input {
+    height: 38px; 
+    border: 1px solid #aaa;
+    background-color: white;
+    padding: 0;
+    margin: 0; 
+    vertical-align: middle;
+}
+.input-quantity .btn-quantity {
+    width: 38px; 
+    font-size: 1.3rem; 
+    font-weight: bold;
+    cursor: pointer;
+}
+.input-quantity input {
+    width: 60px; /* Cho ô nhỏ lại 1 chút */
+    text-align: center; 
+    font-size: 1.1rem;
+    margin-left: -1px; 
+}
+.input-quantity .btn2 {
+    margin-left: -1px;
+}
+/* Tắt mũi tên mặc định của input number */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+
+
+/* --- 3.3 CỘT PHẢI (TÓM TẮT ĐƠN HÀNG) --- */
+.cart-summary {
+    flex: 1; /* Chiếm 1/3 không gian */
+    min-width: 300px; /* Độ rộng tối thiểu */
+    
+    background-color: #f9f6f2; /* Nền be nhạt giống body */
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 24px;
+    
+    /* Quan trọng: Để nó "dính" lại khi cuộn */
+    position: sticky;
+    top: 20px; 
+}
+
+.cart-summary h2 {
+    font-size: 1.5rem;
+    margin-top: 0;
+    margin-bottom: 24px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 16px;
+}
+
+.cart-summary .summary-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.1rem;
+    color: #555;
+    margin-bottom: 16px;
+}
+
+.cart-summary .summary-row.total {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #000;
+    border-top: 1px solid #ccc;
+    padding-top: 20px;
+    margin-top: 20px;
+}
+
+.cart-summary .summary-row.total span:last-child {
+    color: #c0392b; /* Màu đỏ cho tổng tiền cuối */
+}
+
+.cart-summary .btn-checkout {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    
+    background-color: #c0392b; /* Màu đỏ chủ đạo */
+    color: white;
+    
+    border: none;
+    border-radius: 8px;
+    
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.cart-summary .btn-checkout:hover {
+    background-color: #a93226; /* Đỏ đậm hơn */
+}
+
+.cart-summary .btn-continue-shopping {
+    display: block;
+    width: 100%;
+    text-align: center;
+    margin-top: 16px;
+    color: #3498db; /* Màu xanh link */
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.cart-summary .btn-continue-shopping i {
+    margin-right: 8px;
+}
+
+
+/* --- 4. FOOTER (Giữ nguyên) --- */
+#footer {
+    padding: 40px;
+    margin-top: 20px;
+    text-align: center;
+    background-color: white;
+    border-top: 1px solid #e0e0e0;
+    color: #888;
+}
