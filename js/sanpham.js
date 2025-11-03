@@ -87,11 +87,11 @@ let filtered = [...books];
 const categories = Array.from(new Set(books.map(b=>b.category))).sort();
 const publishers = Array.from(new Set(books.map(b=>b.publisher))).sort();
 
-/* ===== DOM refs (CẬP NHẬT) ===== */
+/* ===== DOM refs ===== */
 const qName = document.getElementById('qName');
 const qCat = document.getElementById('qCat');
 const qPub = document.getElementById('qPub'); 
-const qAuthor = document.getElementById('qAuthor'); // <-- THÊM MỚI
+const qAuthor = document.getElementById('qAuthor');
 const qMin = document.getElementById('qMin');
 const qMax = document.getElementById('qMax');
 const btnSearch = document.getElementById('btnSearch');
@@ -128,34 +128,96 @@ function initPublishers(){
   });
 }
 
-/* ===== Render products (grid) with pagination (Đã có NXB) ===== */
+/* ===== HÀM RENDER GRID (Đã cập nhật) ===== */
 function renderGrid(page=1){
-  productGrid.innerHTML = "";
+  productGrid.innerHTML = ""; 
   const start = (page-1)*perPage;
   const pageItems = filtered.slice(start, start+perPage);
 
   if(pageItems.length===0){
     productGrid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">Không tìm thấy sản phẩm.</div>`;
-  } else {
-    pageItems.forEach(b=>{
-      const div = document.createElement('article'); div.className='card'; div.tabIndex=0;
-      div.innerHTML = `
-        <div class="cover" style="background-image:url('${b.img}');background-size:cover;background-position:center;"></div>
-        <div class="meta">
-          <div>
-            <div class="title">${escapeHtml(b.title)}</div>
-            <div class="author" style="margin-bottom: 4px;">${escapeHtml(b.author)}</div>
-            <div class="muted-small">NXB: ${escapeHtml(b.publisher)}</div>
-          </div>
-          <div style="margin-top:10px">
-            <div class="price">${numberWithCommas(b.price)}đ</div>
-          </div>
-        </div>
-      `;
-      div.addEventListener('click', ()=>openModal(b));
-      productGrid.appendChild(div);
-    });
-  }
+    renderPagination(); 
+    return;
+  } 
+  
+  pageItems.forEach(b=>{
+    const div = document.createElement('article');
+    div.className='card';
+    
+    const cover = document.createElement('div');
+    cover.className = 'cover';
+    cover.style.backgroundImage = `url('${b.img}')`;
+    cover.onclick = () => openModal(b); 
+    
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    
+    const infoBlock = document.createElement('div');
+    const title = document.createElement('div');
+    title.className = 'title';
+    title.textContent = b.title;
+    title.onclick = () => openModal(b); 
+    
+    const author = document.createElement('div');
+    author.className = 'author';
+    author.style.marginBottom = '4px';
+    author.textContent = b.author;
+    
+    const publisher = document.createElement('div');
+    publisher.className = 'muted-small';
+    publisher.textContent = `NXB: ${b.publisher}`;
+    
+    infoBlock.append(title, author, publisher); 
+    
+    const actionBlock = document.createElement('div');
+    
+    const price = document.createElement('div');
+    price.className = 'price';
+    price.textContent = `${numberWithCommas(b.price)}đ`;
+    
+    const actions = document.createElement('div');
+    actions.className = 'card-actions';
+    
+    const qtyInput = document.createElement('input');
+    qtyInput.type = 'number';
+    qtyInput.className = 'card-qty';
+    qtyInput.value = 1;
+    qtyInput.min = 1;
+    const qtyInputId = `qty-${b.id}`; 
+    qtyInput.id = qtyInputId; 
+    
+    const btnAdd = document.createElement('button');
+    btnAdd.className = 'btn-add';
+    btnAdd.textContent = 'Thêm';
+    btnAdd.onclick = (e) => {
+      e.stopPropagation(); 
+      const quantity = parseInt(document.getElementById(qtyInputId).value) || 1;
+      const success = coreAddToCart(b, quantity);
+      if (success) {
+        alert(`Đã thêm ${quantity} cuốn "${b.title}" vào giỏ hàng!`);
+        document.getElementById(qtyInputId).value = 1; 
+      }
+    };
+    
+    const btnBuy = document.createElement('button');
+    btnBuy.className = 'btn-buy-now';
+    btnBuy.textContent = 'Mua ngay';
+    btnBuy.onclick = (e) => {
+      e.stopPropagation(); 
+      const quantity = parseInt(document.getElementById(qtyInputId).value) || 1;
+      const success = coreAddToCart(b, quantity); 
+      if (success) {
+        window.location.href = 'giohang.html';
+      }
+    };
+    
+    actions.append(qtyInput, btnAdd, btnBuy);
+    actionBlock.append(price, actions); 
+    meta.append(infoBlock, actionBlock);
+    div.append(cover, meta);
+    productGrid.appendChild(div);
+  });
+
   renderPagination();
 }
 
@@ -181,12 +243,12 @@ function renderPagination(){
   pagination.appendChild(next);
 }
 
-/* ===== Search logic (CẬP NHẬT) ===== */
+/* ===== Search logic (Đã có Tác giả) ===== */
 function doSearch(){
   const name = (qName.value || "").trim().toLowerCase();
   const cat = (qCat.value || "").trim();
   const pub = (qPub.value || "").trim(); 
-  const author = (qAuthor.value || "").trim().toLowerCase(); // <-- Lấy giá trị Tác giả
+  const author = (qAuthor.value || "").trim().toLowerCase(); 
   const min = parseFloat(qMin.value) || 0;
   const max = (qMax.value!=='') ? parseFloat(qMax.value) : Infinity;
 
@@ -194,20 +256,24 @@ function doSearch(){
     const byName = !name || b.title.toLowerCase().includes(name);
     const byCat = !cat || b.category === cat;
     const byPub = !pub || b.publisher === pub; 
-    const byAuthor = !author || b.author.toLowerCase().includes(author); // <-- Thêm logic lọc Tác giả
+    const byAuthor = !author || b.author.toLowerCase().includes(author); 
     const byPrice = (b.price >= min && b.price <= max);
     
-    return byName && byCat && byPub && byAuthor && byPrice; // <-- Cập nhật return
+    return byName && byCat && byPub && byAuthor && byPrice; 
   });
 
   currentPage = 1;
   renderGrid();
 }
 
-/* ===== Modal details (Đã có NXB) ===== */
+/* ================================================= */
+/* ===== MODAL DETAILS (ĐÃ CẬP NHẬT HOÀN TOÀN) ===== */
+/* ================================================= */
 const modal = document.getElementById('modal');
-const modalBuyButton = modal.querySelector('.btn-buy');
 const modalQtyInput = document.getElementById('modalQtyInput'); 
+// Lấy 2 nút mới bằng ID
+const modalBtnAdd = document.getElementById('modalBtnAdd'); 
+const modalBtnBuy = document.getElementById('modalBtnBuy'); 
 
 function openModal(book){
   document.getElementById('modalImg').src = book.img;
@@ -220,14 +286,38 @@ function openModal(book){
   
   modalQtyInput.value = 1;
   
-  modalBuyButton.onclick = () => {
+  // Nút "Thêm vào giỏ" (Modal)
+  modalBtnAdd.onclick = () => {
     const quantity = parseInt(modalQtyInput.value) || 1;
     if (quantity < 1) {
         alert("Số lượng phải ít nhất là 1");
         modalQtyInput.value = 1;
         return;
     }
-    addToCart(book, quantity);
+    const success = coreAddToCart(book, quantity);
+    if (success) {
+      alert(`Đã thêm ${quantity} cuốn "${book.title}" vào giỏ hàng!`);
+      modal.style.display = 'none';
+      modal.setAttribute('aria-hidden', 'true');
+    }
+  };
+  
+  // Nút "Mua ngay" (Modal)
+  modalBtnBuy.onclick = () => {
+    const quantity = parseInt(modalQtyInput.value) || 1;
+    if (quantity < 1) {
+        alert("Số lượng phải ít nhất là 1");
+        modalQtyInput.value = 1;
+        return;
+    }
+    const success = coreAddToCart(book, quantity);
+    if (success) {
+      // Đóng modal trước khi chuyển trang
+      modal.style.display = 'none';
+      modal.setAttribute('aria-hidden', 'true');
+      // Chuyển đến giỏ hàng
+      window.location.href = 'giohang.html';
+    }
   };
   
   modal.style.display = 'flex'; modal.setAttribute('aria-hidden','false');
@@ -236,13 +326,13 @@ function openModal(book){
 document.getElementById('closeModal').addEventListener('click', ()=>{ modal.style.display='none'; modal.setAttribute('aria-hidden','true'); });
 modal.addEventListener('click', (e)=>{ if(e.target===modal) { modal.style.display='none'; modal.setAttribute('aria-hidden','true'); } });
 
-/* ===== Hàm addToCart (logic đăng nhập) ===== */
-function addToCart(book, quantityToAdd) {
+/* ===== HÀM LÕI MỚI: CORE ADD TO CART ===== */
+function coreAddToCart(book, quantityToAdd) {
   const loggedInUserJSON = sessionStorage.getItem('currentUser');
   if (!loggedInUserJSON) {
     alert('Bạn phải đăng nhập để thêm sản phẩm vào giỏ hàng.');
     window.location.href = 'dangki.html'; 
-    return; 
+    return false; 
   }
   
   let users = JSON.parse(localStorage.getItem('users') || '[]');
@@ -251,14 +341,13 @@ function addToCart(book, quantityToAdd) {
 
   if (userIndex === -1) {
     alert('Lỗi: Không tìm thấy người dùng. Vui lòng đăng nhập lại.');
-    return;
+    return false; 
   }
   
   if (!users[userIndex].cart) {
     users[userIndex].cart = [];
   }
   let cart = users[userIndex].cart;
-
   let existingItem = cart.find(item => item.id === book.id);
   
   if (existingItem) {
@@ -277,10 +366,9 @@ function addToCart(book, quantityToAdd) {
   localStorage.setItem('users', JSON.stringify(users));
   sessionStorage.setItem('currentUser', JSON.stringify(users[userIndex]));
 
-  alert(`Đã thêm ${quantityToAdd} cuốn "${book.title}" vào giỏ hàng!`);
-  modal.style.display = 'none';
-  modal.setAttribute('aria-hidden', 'true');
+  return true; 
 }
+
 
 /* ===== Utils ===== */
 function numberWithCommas(x){ return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
@@ -293,18 +381,13 @@ initCategories();
 initPublishers(); 
 renderGrid();
 
-/* Events (CẬP NHẬT) */
+/* Events */
 btnSearch.addEventListener('click', doSearch);
 qName.addEventListener('keyup', (e)=>{ if(e.key==='Enter') doSearch(); });
-qAuthor.addEventListener('keyup', (e)=>{ if(e.key==='Enter') doSearch(); }); // <-- THÊM MỚI
+qAuthor.addEventListener('keyup', (e)=>{ if(e.key==='Enter') doSearch(); });
 
 /* Accessibility */
 document.addEventListener('keydown', (e)=>{
   const active = document.activeElement;
   if(e.key === 'Escape') { modal.style.display='none'; modal.setAttribute('aria-hidden','true'); }
-  if(active && active.classList && active.classList.contains('card')){
-    if(e.key === 'ArrowRight' && active.nextElementSibling) active.nextElementSibling.focus();
-    if(e.key === 'ArrowLeft' && active.previousElementSibling) active.previousElementSibling.focus();
-    if(e.key === 'Enter') active.click();
-  }
 });
