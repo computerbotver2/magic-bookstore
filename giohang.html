@@ -1,48 +1,148 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link rel="stylesheet" href="./css/style_giohang.css">
-    <title>Giỏ hàng</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="stylesheet" href="./css/style_giohang.css">
+<title>Giỏ hàng — Cửa hàng Sách Việt</title>
 </head>
 <body>
-    <div id="page-wapper">
-        <div id="header" >
-            <div class="logo">
-                <h4>BOOK STORE</h4>
-            </div>
-            <div class="search-bar">
-                <input type="text" placeholder="Tìm kiếm sách, tác giả...">
-                <i class="fa-solid fa-magnifying-glass"></i>
-            </div>
-            <div class="header-menu">
-                <a href=""><i class="fa-solid fa-house"></i></a>
-                <a href="./giohang.html"><i class="fa-solid fa-cart-shopping"></i></a>
-                <a href=""><i class="fa-solid fa-user"></i></a>    
-            </div>
+
+<header class="site-header">
+  <div class="container">
+    <div class="header-top">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">📘</div>
+        <div>
+          <div style="font-size:20px">Cửa hàng Sách Việt</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.85)">Giỏ hàng của bạn</div>
         </div>
-        <div id="top-menu">
-            <ul>
-                <li><a href="">Trang chủ</a></li>
-                <li><a href="./sanpham.html">Sản phẩm</a></li>
-                <li><a href="">Tài khoản</a></li>
-            </ul>
+      </div>
+      <nav class="user-nav">
+        <a href="./sanpham.html" title="Trang chủ">
+          <span class="icon">🏠</span>
+          <span class="label">Trang chủ</span>
+        </a>
+        <a href="#" title="Giỏ hàng" class="active">
+          <span class="icon">🛒</span>
+          <span class="label">Giỏ hàng</span>
+        </a>
+        <a href="./dangki.html" title="Tài khoản">
+          <span class="icon">👤</span>
+          <span class="label">Tài khoản</span>
+        </a>
+      </nav>
+      </div>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+    <h2 class="section-title">Giỏ hàng của bạn</h2>
+    
+    <div class="cart-layout">
+      
+      <div class="cart-items-list" id="cartItemsList">
         </div>
-        <div id="cart-page" class="container">
-            <h1>Giỏ Hàng Của Bạn</h1>
+
+      <aside class="cart-summary" id="cartSummary" style="display:none;">
+        
+        <section class="checkout-section">
+          <h4>Thông tin giao hàng</h4>
+          
+          <div class="address-options">
+            <div>
+              <input type="radio" name="address-type" value="saved" id="radio-use-saved" checked>
+              <label for="radio-use-saved">Sử dụng địa chỉ đã lưu</label>
+            </div>
+            <div>
+              <input type="radio" name="address-type" value="new" id="radio-use-new">
+              <label for="radio-use-new">Giao hàng đến địa chỉ mới</label>
+            </div>
+          </div>
+          
+          <div class="saved-address-display" id="saved-address-box">
+            <strong id="saved-name"></strong>
+            <span id="saved-phone"></span>
+            <p id="saved-address"></p>
+          </div>
+          
+          <div class="checkout-form hidden" id="new-address-form">
+            <label for="info-name">Tên người nhận</label>
+            <input type="text" id="info-name" placeholder="Họ và tên">
             
-            <div class="cart-layout">
-                <p>Đang tải giỏ hàng...</p>
-                </div>
+            <label for="info-phone">Số điện thoại</label>
+            <input type="tel" id="info-phone" placeholder="Số điện thoại">
+            
+            <label for="info-address">Địa chỉ nhận hàng</label>
+            <input type="text" id="info-address" placeholder="Số nhà, đường, phường/xã...">
+          </div>
+        </section>
+        
+        <hr>
 
-        </div>
-        <div id="footer">
-            <p>Copyright © 2025 Book Store. All rights reserved.</p>
-        </div>
+        <section class="checkout-section">
+          <h4>Phương thức thanh toán</h4>
+          <div class="payment-options">
+            <div>
+              <input type="radio" name="payment" value="cod" id="pay-cod" checked>
+              <label for="pay-cod">Thanh toán khi nhận hàng (COD)</label>
+            </div>
+            <div>
+              <input type="radio" name="payment" value="online" id="pay-online">
+              <label for="pay-online">Thanh toán trực tuyến (VNPAY, Momo...)</label>
+            </div>
+          </div>
+        </section>
+
+        <hr>
+
+        <section class="checkout-section">
+          <h4>Tóm tắt đơn hàng</h4>
+          <div class="summary-row">
+            <span>Tạm tính</span>
+            <span id="summarySubtotal">0đ</span>
+          </div>
+          <div class="summary-row">
+            <span>Giảm giá</span>
+            <span>0đ</span>
+          </div>
+          <hr>
+          <div class="summary-row total">
+            <span>Tổng cộng</span>
+            <span id="summaryTotal">0đ</span>
+          </div>
+        </section>
+
+        <button class="btn-checkout" id="btn-place-order">XÁC NHẬN ĐẶT HÀNG</button>
+      </aside>
     </div>
+  </div>
+</main>
 
-    <script src="./js/data.js"></script>
-    <script src="./js/giohang.js"></script>
+
+<div class="modal-overlay" id="order-success-modal">
+  <div class="modal-panel">
+      <h3>Đặt hàng thành công!</h3>
+      <p>Cảm ơn bạn đã mua hàng. Đơn hàng của bạn đã được ghi lại.</p>
+      
+      <div class="order-review">
+        <p><strong>Mã đơn hàng:</strong> <span id="order-id"></span></p>
+        <p><strong>Người nhận:</strong> <span id="order-name"></span></p>
+        <p><strong>Điện thoại:</strong> <span id="order-phone"></span></p>
+        <p><strong>Giao đến:</strong> <span id="order-address"></span></p>
+        
+        <h4>Chi tiết sản phẩm:</h4>
+        <div id="order-details-summary"></div>
+        
+        <p style="text-align:right;font-size:18px;margin-top:10px;">
+          <strong>Tổng tiền: <span id="order-total" style="color:var(--primary)"></span></strong>
+        </p>
+      </div>
+      <button id="close-success-modal" class="btn-primary">Tiếp tục mua sắm</button>
+  </div>
+</div>
+
+<script src="./js/giohang.js"></script>
 </body>
 </html>
