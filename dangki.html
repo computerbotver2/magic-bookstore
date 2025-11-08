@@ -8,7 +8,6 @@
   <link rel="stylesheet" href="./css/style_sanpham.css">
 
   <style>
-    /* CSS Gốc của file này */
     .form-wrapper {
       background: #fff;
       padding: 20px 40px;
@@ -38,8 +37,8 @@
     .hidden { display: none; }
     .form-wrapper textarea { width: 100%; height: 50px; resize: none; }
     .form-wrapper label { font-weight: bold; }
+    .form-wrapper p { font-size: 14px; line-height: 1.6; }
 
-    /* CSS Kiểu cho Đơn hàng */
     #orders-list {
       list-style-type: none; padding: 0;
       max-height: 400px; overflow-y: auto;
@@ -63,7 +62,6 @@
       color: #777; margin-top: 5px;
     }
     .order-items-list li { margin-bottom: 3px; }
-
   </style>
 </head>
 <body>
@@ -92,13 +90,14 @@
           <span class="label">Tài khoản</span>
         </a>
       </nav>
-      </div>
+    </div>
   </div>
 </header>
 
 <main>
   <div class="container"> 
     
+    <!-- ĐĂNG NHẬP -->
     <div class="form-wrapper" id="login-container">
       <h2>Đăng Nhập</h2>
       <div class="error" id="login-error"></div>
@@ -108,10 +107,11 @@
       <button class="secondary-btn" id="goto-register">CHUYỂN SANG ĐĂNG KÍ</button>
     </div>
 
+    <!-- ĐĂNG KÝ -->
     <div class="form-wrapper hidden" id="register-container">
       <h2>Đăng Kí</h2>
       <div class="error" id="register-error"></div>
-      <input type="text" id="register-username" placeholder="Tên đăng ký">
+      <input type="text" id="register-username" placeholder="Tên đăng nhập">
       <input type="password" id="register-password" placeholder="Mật khẩu">
       <input type="password" id="register-confirm-password" placeholder="Xác nhận mật khẩu">
       <input type="email" id="register-email" placeholder="Email">
@@ -119,6 +119,29 @@
       <button class="secondary-btn" id="goto-login">QUAY LẠI ĐĂNG NHẬP</button>
     </div>
 
+    <!-- ĐỔI MẬT KHẨU BẮT BUỘC -->
+    <div class="form-wrapper hidden" id="force-change-password-container">
+      <h2>⚠️ Yêu cầu đổi mật khẩu</h2>
+      <p style="text-align: center; color: #666; margin-bottom: 20px;">
+        Admin yêu cầu bạn đổi mật khẩu.<br>
+        Vui lòng đổi mật khẩu để tiếp tục sử dụng.
+      </p>
+      <div class="error" id="force-password-error"></div>
+      
+      <label>Mật khẩu hiện tại:</label>
+      <input type="password" id="force-old-password" placeholder="Nhập mật khẩu hiện tại">
+      
+      <label>Mật khẩu mới:</label>
+      <input type="password" id="force-new-password" placeholder="Nhập mật khẩu mới ">
+      
+      <label>Xác nhận mật khẩu mới:</label>
+      <input type="password" id="force-confirm-new-password" placeholder="Nhập lại mật khẩu mới">
+      
+      <button id="force-confirm-password-btn">XÁC NHẬN ĐỔI MẬT KHẨU</button>
+      <button class="secondary-btn" id="force-logout-btn">ĐĂNG XUẤT</button>
+    </div>
+
+    <!-- TRANG CHÍNH -->
     <div class="form-wrapper hidden" id="home-container">
       <h2 id="home-welcome">Trang Chính</h2>
       <button id="go-products">Xem Sản Phẩm</button>
@@ -126,6 +149,7 @@
       <button class="secondary-btn" id="logout-btn">ĐĂNG XUẤT</button>
     </div>
 
+    <!-- THÔNG TIN KHÁCH HÀNG -->
     <div class="form-wrapper hidden" id="info-container">
       <h2>Thông Tin Khách Hàng</h2>
       <label>Tên khách hàng:</label>
@@ -167,12 +191,14 @@
   const registerContainer = document.getElementById('register-container');
   const homeContainer = document.getElementById('home-container');
   const infoContainer = document.getElementById('info-container');
+  const forceChangePasswordContainer = document.getElementById('force-change-password-container');
   const changePasswordContainer = document.getElementById('change-password-container');
   const ordersContainer = document.getElementById('orders-container');
   const loginError = document.getElementById('login-error');
   const registerError = document.getElementById('register-error');
   const passwordError = document.getElementById('password-error');
-  // State
+  const forcePasswordError = document.getElementById('force-password-error');
+  
   let currentUser = null;
 
   function show(container) {
@@ -180,24 +206,94 @@
     registerContainer.classList.add('hidden');
     homeContainer.classList.add('hidden');
     infoContainer.classList.add('hidden');
+    forceChangePasswordContainer.classList.add('hidden');
     container.classList.remove('hidden');
   }
 
-  // --- QUẢN LÝ DỮ LIỆU ---
+  // ==================== MIGRATION ====================
+  function migrateOldUsers() {
+    const saved = localStorage.getItem('users');
+    if (!saved) return;
+    
+    let users = JSON.parse(saved);
+    let hasChanged = false;
+    
+    users = users.map((user, index) => {
+      let updated = { ...user };
+      
+      if (!updated.id) {
+        let maxNum = 0;
+        users.forEach(u => {
+          if (u.id && u.id.startsWith('KH')) {
+            const num = parseInt(u.id.substring(2));
+            if (num > maxNum) maxNum = num;
+          }
+        });
+        updated.id = 'KH' + String(maxNum + index + 1).padStart(3, '0');
+        hasChanged = true;
+      }
+      
+      if (!updated.name) {
+        updated.name = updated.username || 'User';
+        hasChanged = true;
+      }
+      
+      if (!updated.date) {
+        updated.date = new Date().toLocaleDateString('vi-VN');
+        hasChanged = true;
+      }
+      
+      if (!updated.status) {
+        updated.status = 'active';
+        hasChanged = true;
+      }
+      
+      if (!updated.orders) {
+        updated.orders = [];
+        hasChanged = true;
+      }
+      
+      if (!updated.cart) {
+        updated.cart = [];
+        hasChanged = true;
+      }
+      
+      if (!updated.address) {
+        updated.address = '';
+        hasChanged = true;
+      }
+      
+      return updated;
+    });
+    
+    if (hasChanged) {
+      localStorage.setItem('users', JSON.stringify(users));
+      console.log('✅ [User] Đã cập nhật ' + users.length + ' tài khoản');
+    }
+  }
+
+
+
+  // ==================== QUẢN LÝ DỮ LIỆU ====================
   function getUsers() {
+    migrateOldUsers();
     return JSON.parse(localStorage.getItem('users') || '[]');
   }
+  
   function saveUsers(users) {
     localStorage.setItem('users', JSON.stringify(users));
   }
+  
   function setLoggedInUser(user) {
     currentUser = user;
     sessionStorage.setItem('currentUser', JSON.stringify(user));
   }
+  
   function clearLoggedInUser() {
     currentUser = null;
     sessionStorage.removeItem('currentUser');
   }
+  
   function syncCurrentUser() {
     const users = getUsers();
     if (currentUser) {
@@ -210,47 +306,117 @@
     }
   }
 
-  // -------------------- Đăng nhập --------------------
+  // ==================== ĐĂNG NHẬP ====================
   document.getElementById('login-btn').addEventListener('click', () => {
-    const username = document.getElementById('login-username').value;
+    const username = document.getElementById('login-username').value.trim();
     const password = document.getElementById('login-password').value;
+    
+    if (!username || !password) {
+      loginError.textContent = 'Vui lòng nhập đầy đủ thông tin';
+      return;
+    }
+    
     const users = getUsers();
     const user = users.find(u => u.username === username && u.password === password);
+    
     if (user) {
+      if (user.status === 'locked') {
+        loginError.textContent = '🔒 Tài khoản đã bị khóa. Vui lòng liên hệ Admin!';
+        return;
+      }
+      
       setLoggedInUser(user);
-      show(homeContainer);
-      document.getElementById('home-welcome').textContent = `Chào mừng, ${user.username}`;
       loginError.textContent = '';
+      
+      document.getElementById('login-username').value = '';
+      document.getElementById('login-password').value = '';
+      
+      // ✅ KIỂM TRA: Nếu là Admin → Chuyển đến trang Admin
+      if (user.role === 'admin' && user.username === 'admin') {
+        localStorage.setItem('adminLoggedIn', 'true');
+        localStorage.setItem('adminInfo', JSON.stringify({
+          username: user.username,
+          name: user.name
+        }));
+        
+        alert('✅ Đăng nhập Admin thành công!\n\nBạn sẽ được chuyển đến trang quản lý...');
+        window.location.href = 'index.html'; // Chuyển đến trang Admin
+        return;
+      }
+      
+      // User thường
+      if (user.requirePasswordChange === true) {
+        show(forceChangePasswordContainer);
+        forcePasswordError.textContent = '';
+      } else {
+        show(homeContainer);
+        document.getElementById('home-welcome').textContent = `Chào mừng, ${user.name || user.username}`;
+      }
     } else {
-      loginError.textContent = 'Sai thông tin đăng nhập';
+      loginError.textContent = 'Sai tên đăng nhập hoặc mật khẩu';
     }
   });
 
   document.getElementById('goto-register').addEventListener('click', () => {
     show(registerContainer);
     registerError.textContent = '';
+    loginError.textContent = '';
   });
 
-  // -------------------- Đăng kí (CẬP NHẬT) --------------------
+  // ==================== ĐĂNG KÝ ====================
   document.getElementById('register-btn').addEventListener('click', () => {
-    const username = document.getElementById('register-username').value;
+    const username = document.getElementById('register-username').value.trim();
     const password = document.getElementById('register-password').value;
     const confirmPassword = document.getElementById('register-confirm-password').value;
-    const email = document.getElementById('register-email').value;
+    const email = document.getElementById('register-email').value.trim();
     const users = getUsers();
 
     if (!username || !password || !confirmPassword || !email) {
-      registerError.textContent = 'Vui lòng điền đầy đủ thông tin'; return;
-    }
-    if (password !== confirmPassword) {
-      registerError.textContent = 'Mật khẩu không khớp'; return;
-    }
-    if (users.some(u => u.username === username)) {
-      registerError.textContent = 'Tên đăng nhập đã tồn tại'; return;
+      registerError.textContent = 'Vui lòng điền đầy đủ thông tin'; 
+      return;
     }
 
-    // Thêm 'address: ""' cho user mới
-    const newUser = { username, password, email, phone: '', address: '', orders: [], cart: [] };
+    if (password !== confirmPassword) {
+      registerError.textContent = 'Mật khẩu không khớp'; 
+      return;
+    }
+    if (!email.includes('@')) {
+      registerError.textContent = 'Email không hợp lệ'; 
+      return;
+    }
+    if (users.some(u => u.username === username)) {
+      registerError.textContent = 'Tên đăng nhập đã tồn tại'; 
+      return;
+    }
+    if (users.some(u => u.email === email)) {
+      registerError.textContent = 'Email đã được sử dụng'; 
+      return;
+    }
+
+    let maxNum = 0;
+    users.forEach(u => {
+      if (u.id && u.id.startsWith('KH')) {
+        const num = parseInt(u.id.substring(2));
+        if (num > maxNum) maxNum = num;
+      }
+    });
+    const newId = 'KH' + String(maxNum + 1).padStart(3, '0');
+    const registerDate = new Date().toLocaleDateString('vi-VN');
+    
+    const newUser = { 
+      id: newId,
+      username: username,
+      password: password,
+      name: username,
+      email: email,
+      phone: '',
+      address: '',
+      date: registerDate,
+      status: 'active',
+      orders: [],
+      cart: []
+    };
+    
     users.push(newUser);
     saveUsers(users);
     setLoggedInUser(newUser); 
@@ -258,44 +424,116 @@
     registerError.textContent = '';
     show(homeContainer);
     document.getElementById('home-welcome').textContent = `Chào mừng, ${newUser.username}`;
+    
+    document.getElementById('register-username').value = '';
+    document.getElementById('register-password').value = '';
+    document.getElementById('register-confirm-password').value = '';
+    document.getElementById('register-email').value = '';
   });
 
   document.getElementById('goto-login').addEventListener('click', () => {
     show(loginContainer);
     loginError.textContent = '';
+    registerError.textContent = '';
   });
 
-  // -------------------- Trang chính --------------------
+  // ==================== ĐỔI MẬT KHẨU BẮT BUỘC ====================
+  document.getElementById('force-confirm-password-btn').addEventListener('click', () => {
+    if (!currentUser) return;
+    
+    const oldPass = document.getElementById('force-old-password').value;
+    const newPass = document.getElementById('force-new-password').value;
+    const confirmNew = document.getElementById('force-confirm-new-password').value;
+
+    if (!oldPass || !newPass || !confirmNew) {
+      forcePasswordError.textContent = 'Vui lòng điền đầy đủ thông tin';
+      return;
+    }
+    if (oldPass !== currentUser.password) {
+      forcePasswordError.textContent = 'Mật khẩu hiện tại không đúng'; 
+      return;
+    }
+    if (newPass === oldPass) {
+      forcePasswordError.textContent = 'Mật khẩu mới phải khác mật khẩu cũ';
+      return;
+    }
+    if (newPass !== confirmNew) {
+      forcePasswordError.textContent = 'Mật khẩu mới không khớp'; 
+      return;
+    }
+
+    currentUser.password = newPass;
+    currentUser.requirePasswordChange = false;
+    
+    const users = getUsers();
+    const index = users.findIndex(u => u.username === currentUser.username);
+    
+    if (index !== -1) {
+      users[index] = currentUser;
+      saveUsers(users);
+      setLoggedInUser(currentUser); 
+      
+      forcePasswordError.textContent = '';
+      
+      document.getElementById('force-old-password').value = '';
+      document.getElementById('force-new-password').value = '';
+      document.getElementById('force-confirm-new-password').value = '';
+      
+      alert('✅ Đổi mật khẩu thành công!');
+      show(homeContainer);
+      document.getElementById('home-welcome').textContent = `Chào mừng, ${currentUser.name || currentUser.username}`;
+    }
+  });
+
+  document.getElementById('force-logout-btn').addEventListener('click', () => {
+    clearLoggedInUser();
+    show(loginContainer);
+  });
+
+  // ==================== TRANG CHÍNH ====================
   document.getElementById('logout-btn').addEventListener('click', () => {
     clearLoggedInUser();
     show(loginContainer);
   });
+  
   document.getElementById('go-products').addEventListener('click', () => {
     window.location.href = 'sanpham.html';
   });
+  
   document.getElementById('go-info').addEventListener('click', () => {
+    checkAccountStatusRealtime();
+    if (!currentUser) return;
+    
     show(infoContainer);
     loadUserInfo();
     changePasswordContainer.classList.add('hidden');
     ordersContainer.classList.add('hidden');
   });
 
-  // -------------------- Thông tin khách hàng (CẬP NHẬT) --------------------
+  // ==================== THÔNG TIN KHÁCH HÀNG ====================
   function loadUserInfo() {
     if (!currentUser) return; 
-    document.getElementById('info-username').value = currentUser.username;
+    document.getElementById('info-username').value = currentUser.name || currentUser.username;
     document.getElementById('info-phone').value = currentUser.phone || '';
     document.getElementById('info-email').value = currentUser.email || '';
-    // Load địa chỉ đã lưu
     document.getElementById('info-address').value = currentUser.address || '';
   }
 
   document.getElementById('save-info').addEventListener('click', () => {
     if (!currentUser) return;
-    currentUser.phone = document.getElementById('info-phone').value;
-    currentUser.email = document.getElementById('info-email').value;
-    // Lưu địa chỉ
-    currentUser.address = document.getElementById('info-address').value;
+    
+    const newPhone = document.getElementById('info-phone').value.trim();
+    const newEmail = document.getElementById('info-email').value.trim();
+    const newAddress = document.getElementById('info-address').value.trim();
+    
+    if (newEmail && !newEmail.includes('@')) {
+      alert('Email không hợp lệ');
+      return;
+    }
+    
+    currentUser.phone = newPhone;
+    currentUser.email = newEmail;
+    currentUser.address = newAddress;
     
     const users = getUsers();
     const index = users.findIndex(u => u.username === currentUser.username);
@@ -303,7 +541,7 @@
       users[index] = currentUser;
       saveUsers(users);
       setLoggedInUser(currentUser);
-      alert('Đã lưu thông tin');
+      alert('✅ Đã lưu thông tin thành công');
     }
   });
 
@@ -311,10 +549,13 @@
     show(homeContainer);
   });
 
-  // -------------------- Đổi mật khẩu --------------------
+  // ==================== ĐỔI MẬT KHẨU ====================
   document.getElementById('change-password').addEventListener('click', () => {
     changePasswordContainer.classList.toggle('hidden');
     passwordError.textContent = '';
+    document.getElementById('old-password').value = '';
+    document.getElementById('new-password').value = '';
+    document.getElementById('confirm-new-password').value = '';
   });
 
   document.getElementById('confirm-password-btn').addEventListener('click', () => {
@@ -322,11 +563,17 @@
     const newPass = document.getElementById('new-password').value;
     const confirmNew = document.getElementById('confirm-new-password').value;
 
-    if (oldPass !== currentUser.password) {
-      passwordError.textContent = 'Mật khẩu cũ không đúng'; return;
+    if (!oldPass || !newPass || !confirmNew) {
+      passwordError.textContent = 'Vui lòng điền đầy đủ thông tin';
+      return;
     }
-    if (!newPass || newPass !== confirmNew) {
-      passwordError.textContent = 'Mật khẩu mới không khớp hoặc bị bỏ trống'; return;
+    if (oldPass !== currentUser.password) {
+      passwordError.textContent = 'Mật khẩu cũ không đúng'; 
+      return;
+    }
+    if (newPass !== confirmNew) {
+      passwordError.textContent = 'Mật khẩu mới không khớp'; 
+      return;
     }
 
     currentUser.password = newPass;
@@ -339,71 +586,234 @@
       setLoggedInUser(currentUser); 
       passwordError.textContent = '';
       changePasswordContainer.classList.add('hidden');
-      alert('Đổi mật khẩu thành công');
+      alert('✅ Đổi mật khẩu thành công');
+      
+      document.getElementById('old-password').value = '';
+      document.getElementById('new-password').value = '';
+      document.getElementById('confirm-new-password').value = '';
     }
   });
 
-  // -------------------- Xem đơn hàng --------------------
-  document.getElementById('view-orders').addEventListener('click', () => {
-    ordersContainer.classList.toggle('hidden'); 
-    if (ordersContainer.classList.contains('hidden')) return; 
+  // ==================== XEM ĐƠN HÀNG USER ====================
+document.getElementById('view-orders').addEventListener('click', () => {
+  ordersContainer.classList.toggle('hidden'); 
+  if (ordersContainer.classList.contains('hidden')) return; 
+  
+  const ordersList = document.getElementById('orders-list');
+  ordersList.innerHTML = ''; 
+  syncCurrentUser(); 
+
+  if (currentUser.orders && currentUser.orders.length > 0) {
+    const sortedOrders = currentUser.orders.sort((a, b) => new Date(b.date) - new Date(a.date));
     
-    const ordersList = document.getElementById('orders-list');
-    ordersList.innerHTML = ''; 
-    syncCurrentUser(); 
+    sortedOrders.forEach(order => {
+      const li = document.createElement('li');
+      li.className = 'order-card'; 
 
-    if (currentUser.orders && currentUser.orders.length > 0) {
-      const sortedOrders = currentUser.orders.sort((a, b) => new Date(b.date) - new Date(a.date));
-      sortedOrders.forEach(order => {
-        const li = document.createElement('li');
-        li.className = 'order-card'; 
-
-        const orderDate = new Date(order.date).toLocaleDateString('vi-VN', {
-          day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
-        });
-        const orderTotal = order.total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + 'đ';
-        const itemsHtml = order.items.map(item => 
-          `<li>${item.title} (x${item.quantity})</li>`
-        ).join('');
-
-        li.innerHTML = `
-          <div class="order-card-header">
-            <span class="order-id">${order.id}</span>
-            <span class="order-total">${orderTotal}</span>
-          </div>
-          <div class="order-card-body">
-            <p><strong>Ngày đặt:</strong> ${orderDate}</p>
-            <p><strong>Giao đến:</strong> ${order.shippingAddress.name} - ${order.shippingAddress.address}</p>
-            <p><strong>Thanh toán:</strong> ${order.paymentMethod}</p>
-            <p><strong>Sản phẩm:</strong></p>
-            <ul class="order-items-list">
-              ${itemsHtml}
-            </ul>
-          </div>
-        `;
-        ordersList.appendChild(li);
+      const orderDate = new Date(order.date).toLocaleString('vi-VN', {
+        day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
       });
-    } else {
-      ordersList.innerHTML = '<li style="padding:10px; text-align:center; color: #777;">Chưa có lịch sử mua hàng.</li>';
+      const orderTotal = order.total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + 'đ';
+      const itemsHtml = order.items.map(item => 
+        `<li>${item.title} (x${item.quantity})</li>`
+      ).join('');
+
+      // ✅ XỬ LÝ TRẠNG THÁI - USER THẤY "ĐÃ ĐẶT HÀNG" THAY VÌ "MỚI ĐẶT"
+      let statusDisplay = '';
+      let actionButtons = '';
+      
+      switch(order.status) {
+        case 'pending':
+          statusDisplay = '<span style="color:#f59e0b; font-weight:600;">🟡 Đã đặt hàng</span>';
+          actionButtons = `
+            <button onclick="cancelOrder('${order.id}')" style="background:#ef4444; color:white; padding:8px 16px; border:none; border-radius:6px; cursor:pointer; margin-top:10px;">
+              ❌ Hủy đơn hàng
+            </button>
+          `;
+          break;
+          
+        case 'processing':
+          statusDisplay = '<span style="color:#3b82f6; font-weight:600;">🔵 Đang xử lý</span>';
+          actionButtons = '<p style="color:#3b82f6; font-size:13px; margin-top:10px;">⏳ Admin đang xử lý đơn hàng của bạn...</p>';
+          break;
+          
+        case 'shipped':
+          statusDisplay = '<span style="color:#10b981; font-weight:600;">🚚 Đã giao hàng</span>';
+          actionButtons = `
+            <p style="color:#10b981; font-size:13px; margin-top:10px;">
+              📦 Đơn hàng đã được giao đến bạn
+            </p>
+            <button onclick="confirmReceived('${order.id}')" style="background:#10b981; color:white; padding:8px 16px; border:none; border-radius:6px; cursor:pointer; margin-top:10px;">
+              ✅ Đã nhận hàng
+            </button>
+          `;
+          break;
+          
+        case 'completed':
+          statusDisplay = '<span style="color:#10b981; font-weight:600;">✅ Hoàn thành</span>';
+          actionButtons = '<p style="color:#10b981; font-size:13px; margin-top:10px;">✅ Đơn hàng đã hoàn thành</p>';
+          break;
+          
+        case 'cancelled':
+          statusDisplay = '<span style="color:#ef4444; font-weight:600;">❌ Đã hủy</span>';
+          const cancelReason = order.cancelledBy === 'admin' 
+            ? '<p style="color:#ef4444; font-size:13px; margin-top:10px;">⚠️ Admin đã hủy đơn hàng này</p>'
+            : '<p style="color:#999; font-size:13px; margin-top:10px;">Bạn đã hủy đơn hàng này</p>';
+          actionButtons = cancelReason;
+          break;
+      }
+
+      li.innerHTML = `
+        <div class="order-card-header">
+          <span class="order-id">${order.id}</span>
+          <span class="order-total">${orderTotal}</span>
+        </div>
+        <div class="order-card-body">
+          <p><strong>Ngày đặt:</strong> ${orderDate}</p>
+          <p><strong>Trạng thái:</strong> ${statusDisplay}</p>
+          <p><strong>Giao đến:</strong> ${order.shippingAddress.name} - ${order.shippingAddress.address}</p>
+          <p><strong>Thanh toán:</strong> ${order.paymentMethod}</p>
+          <p><strong>Sản phẩm:</strong></p>
+          <ul class="order-items-list">
+            ${itemsHtml}
+          </ul>
+          ${actionButtons}
+        </div>
+      `;
+      ordersList.appendChild(li);
+    });
+  } else {
+    ordersList.innerHTML = '<li style="padding:10px; text-align:center; color: #777;">Chưa có lịch sử mua hàng.</li>';
+  }
+});
+
+// ✅ HỦY ĐƠN HÀNG (USER)
+function cancelOrder(orderId) {
+  if (!confirm('⚠️ Bạn có chắc muốn HỦY đơn hàng này?\n\nThao tác này không thể hoàn tác!')) {
+    return;
+  }
+  
+  const users = getUsers();
+  const userIndex = users.findIndex(u => u.username === currentUser.username);
+  
+  if (userIndex !== -1) {
+    const orderIndex = users[userIndex].orders.findIndex(o => o.id === orderId);
+    
+    if (orderIndex !== -1) {
+      // Chỉ cho hủy khi đơn đang ở trạng thái "pending"
+      if (users[userIndex].orders[orderIndex].status !== 'pending') {
+        alert('❌ Không thể hủy đơn hàng đang được xử lý!');
+        return;
+      }
+      
+      users[userIndex].orders[orderIndex].status = 'cancelled';
+      users[userIndex].orders[orderIndex].cancelledBy = 'user';
+      users[userIndex].orders[orderIndex].cancelledAt = new Date().toISOString();
+      
+      saveUsers(users);
+      setLoggedInUser(users[userIndex]);
+      
+      alert('✅ Đã hủy đơn hàng thành công!');
+      
+      // Refresh danh sách
+      document.getElementById('view-orders').click();
+      document.getElementById('view-orders').click();
     }
-  });
+  }
+}
 
-  document.getElementById('close-orders').addEventListener('click', () => {
-    ordersContainer.classList.add('hidden');
-  });
+// ✅ XÁC NHẬN NHẬN HÀNG (USER)
+function confirmReceived(orderId) {
+  if (!confirm('✅ Xác nhận bạn đã nhận được hàng?\n\nĐơn hàng sẽ được đánh dấu hoàn thành.')) {
+    return;
+  }
+  
+  const users = getUsers();
+  const userIndex = users.findIndex(u => u.username === currentUser.username);
+  
+  if (userIndex !== -1) {
+    const orderIndex = users[userIndex].orders.findIndex(o => o.id === orderId);
+    
+    if (orderIndex !== -1) {
+      users[userIndex].orders[orderIndex].status = 'completed';
+      users[userIndex].orders[orderIndex].completedAt = new Date().toISOString();
+      
+      saveUsers(users);
+      setLoggedInUser(users[userIndex]);
+      
+      alert('✅ Cảm ơn bạn đã xác nhận!\n\nĐơn hàng đã hoàn thành.');
+      
+      // Refresh danh sách
+      document.getElementById('view-orders').click();
+      document.getElementById('view-orders').click();
+    }
+  }
+}
 
-  // -------------------- KHỞI TẠO --------------------
+document.getElementById('close-orders').addEventListener('click', () => {
+  ordersContainer.classList.add('hidden');
+});
+
+
+document.getElementById('close-orders').addEventListener('click', () => {
+  ordersContainer.classList.add('hidden');
+});
+  // ==================== KIỂM TRA REALTIME ====================
+  function checkAccountStatusRealtime() {
+    if (!currentUser) return;
+    
+    const users = getUsers();
+    const latestUser = users.find(u => u.username === currentUser.username);
+    
+    if (!latestUser) {
+      alert('⚠️ Tài khoản không tồn tại. Vui lòng liên hệ Admin!');
+      clearLoggedInUser();
+      show(loginContainer);
+      return;
+    }
+    
+    if (latestUser.status === 'locked') {
+      alert('🔒 Tài khoản của bạn đã bị khóa bởi Admin!\nBạn sẽ được đăng xuất.');
+      clearLoggedInUser();
+      show(loginContainer);
+      return;
+    }
+    
+    if (latestUser.requirePasswordChange === true && currentUser.requirePasswordChange !== true) {
+      alert('⚠️ Admin yêu cầu bạn đổi mật khẩu.\nVui lòng đổi mật khẩu để tiếp tục!');
+      setLoggedInUser(latestUser);
+      show(forceChangePasswordContainer);
+      forcePasswordError.textContent = '';
+      return;
+    }
+    
+    setLoggedInUser(latestUser);
+  }
+
+  setInterval(checkAccountStatusRealtime, 2000);
+
+  // ==================== KHỞI TẠO ====================
   function initialize() {
+    
     const storedUser = sessionStorage.getItem('currentUser');
     if (storedUser) {
       currentUser = JSON.parse(storedUser);
       syncCurrentUser(); 
-      show(homeContainer);
-      document.getElementById('home-welcome').textContent = `Chào mừng, ${currentUser.username}`;
+      if (currentUser) {
+        if (currentUser.requirePasswordChange === true) {
+          show(forceChangePasswordContainer);
+        } else {
+          show(homeContainer);
+          document.getElementById('home-welcome').textContent = `Chào mừng, ${currentUser.name || currentUser.username}`;
+        }
+      } else {
+        show(loginContainer);
+      }
     } else {
       show(loginContainer);
     }
   }
+  
   initialize();
 </script>
 </body>

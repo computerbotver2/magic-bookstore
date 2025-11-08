@@ -1,97 +1,81 @@
 // ============================================
-// BƯỚC 1: ĐỌC DỮ LIỆU TỪ LOCALSTORAGE
+// BIẾN TOÀN CỤC
 // ============================================
 
-// JSON.parse(): Chuyển chuỗi JSON thành mảng object
-// localStorage.getItem('importOrders'): Lấy dữ liệu đã lưu với key là 'importOrders'
-// || [...]: Nếu localStorage trống (null), dùng dữ liệu mặc định bên dưới
-let importOrders = JSON.parse(localStorage.getItem('importOrders')) || [
-    // Dữ liệu mặc định chỉ chạy lần đầu tiên khi chưa có dữ liệu trong localStorage
-    { id: "PN001", supplier: "NXB Trẻ", date: "2024-11-01", total: 5000000, status: "completed", items: 5 },
-    { id: "PN002", supplier: "NXB Kim Đồng", date: "2024-11-02", total: 3500000, status: "pending", items: 3 },
-    { id: "PN003", supplier: "Fahasa", date: "2024-10-28", total: 7200000, status: "completed", items: 8 },
-    { id: "PN004", supplier: "NXB Văn học", date: "2024-10-25", total: 2800000, status: "cancelled", items: 2 },
-];
+let importOrders = [];
 
-// ============================================
-// BƯỚC 2: OBJECT MAPPING CHO TRẠNG THÁI
-// ============================================
-
-// Object này chứa text hiển thị cho từng trạng thái
 const importStatusText = {
-    pending: "Chờ nhập",       // Phiếu mới tạo, chưa nhập hàng
-    completed: "Đã hoàn thành", // Đã nhập hàng xong
-    cancelled: "Đã hủy"        // Phiếu bị hủy
+    pending: "Chờ nhập",
+    completed: "Đã hoàn thành"
 };
 
-// Object này chứa class CSS cho từng trạng thái (để tô màu badge)
 const importStatusClass = {
-    pending: "warning",    // Màu vàng/cam (cảnh báo)
-    completed: "success",  // Màu xanh lá (thành công)
-    cancelled: "danger"    // Màu đỏ (nguy hiểm/hủy)
+    pending: "warning",
+    completed: "success"
 };
 
 // ============================================
-// BƯỚC 3: HÀM LƯU DỮ LIỆU VÀO LOCALSTORAGE
+// LƯU DỮ LIỆU
 // ============================================
 
 function saveImportOrders() {
-    // JSON.stringify(): Chuyển mảng importOrders thành chuỗi JSON để lưu
-    // localStorage.setItem(): Lưu dữ liệu với key là 'importOrders'
-    // ⭐ Hàm này PHẢI được gọi sau mỗi lần thêm/sửa/xóa/thay đổi trạng thái
     localStorage.setItem('importOrders', JSON.stringify(importOrders));
 }
 
 // ============================================
-// BƯỚC 4: HIỂN THỊ DANH SÁCH PHIẾU NHẬP
+// HIỂN THỊ DANH SÁCH
 // ============================================
 
-// filteredData: Dữ liệu đã lọc (hoặc toàn bộ nếu không lọc)
 function displayImportOrders(filteredData = importOrders) {
     let html = '';
     
-    // forEach(): Duyệt qua từng phiếu nhập
-    // order: Phiếu nhập hiện tại
-    // index: Vị trí trong mảng (0, 1, 2, ...)
-    filteredData.forEach((order, index) => {
-        html += `<tr>`;
-        html += `<td><strong>${order.id}</strong></td>`;
-        html += `<td>${order.supplier}</td>`;
-        html += `<td>${order.date}</td>`;
-        html += `<td>${order.items}</td>`;
-        
-        // .toLocaleString(): Format số thành dạng có dấu phẩy
-        // VD: 5000000 → "5,000,000"
-        html += `<td><strong>${order.total.toLocaleString()}₫</strong></td>`;
-        
-        // Hiển thị badge trạng thái với màu sắc tương ứng
-        html += `<td><span class="badge ${importStatusClass[order.status]}">${importStatusText[order.status]}</span></td>`;
-        
-        html += `<td>
-                    <div class="action-btns">
-                        <button class="btn-icon edit" onclick="editImport(${index})" title="Sửa">
-                            <i class='bx bx-edit'></i>
-                        </button>`;
-        
-        // Chỉ hiển thị nút Hoàn thành và Hủy nếu phiếu đang ở trạng thái "pending"
-        // Ternary operator: condition ? true_value : false_value
-        if (order.status === 'pending') {
-            html += `
-                        <button class="btn-icon view" onclick="completeImport(${index})" title="Hoàn thành">
-                            <i class='bx bx-check'></i>
-                        </button>
-                        <button class="btn-icon delete" onclick="cancelImport(${index})" title="Hủy">
-                            <i class='bx bx-x'></i>
-                        </button>`;
-        }
-        
-        html += `
-                    </div>
-                 </td>`;
-        html += `</tr>`;
-    });
+    if (filteredData.length === 0) {
+        html = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#999;">Chưa có phiếu nhập nào</td></tr>';
+    } else {
+        filteredData.forEach((order, index) => {
+            // Tìm index thực trong mảng gốc
+            const realIndex = importOrders.findIndex(o => o.id === order.id);
+            
+            html += `<tr>`;
+            html += `<td><strong>${order.id}</strong></td>`;
+            html += `<td>${order.date}</td>`;
+            
+            // HIỂN THỊ CHI TIẾT SẢN PHẨM TRONG CELL
+            html += `<td style="text-align: left;">`;
+            order.products.forEach(p => {
+                html += `<div style="margin: 3px 0;">
+                            • ${p.name}: <strong>${p.quantity}</strong> × ${p.importPrice.toLocaleString()}₫ 
+                            = <strong>${(p.quantity * p.importPrice).toLocaleString()}₫</strong>
+                         </div>`;
+            });
+            html += `</td>`;
+            
+            html += `<td><strong style="color: #e74c3c;">${order.total.toLocaleString()}₫</strong></td>`;
+            html += `<td><span class="badge ${importStatusClass[order.status]}">${importStatusText[order.status]}</span></td>`;
+            
+            html += `<td><div class="action-btns">`;
+            
+            // CHỈ CHO SỬA KHI PENDING
+            if (order.status === 'pending') {
+                html += `
+                    <button class="btn-icon edit" onclick="editImport(${realIndex})" title="Sửa">
+                        <i class='bx bx-edit'></i>
+                    </button>
+                    <button class="btn-icon view" onclick="completeImport(${realIndex})" title="Hoàn thành">
+                        <i class='bx bx-check'></i>
+                    </button>
+                    <button class="btn-icon delete" onclick="deleteImport(${realIndex})" title="Xóa">
+                        <i class='bx bx-trash'></i>
+                    </button>`;
+            } else {
+                html += `<span style="color: #95a5a6;">Đã hoàn thành</span>`;
+            }
+            
+            html += `</div></td>`;
+            html += `</tr>`;
+        });
+    }
     
-    // Đưa HTML vào bảng có id="importOrdersTable"
     const table = document.getElementById('importOrdersTable');
     if (table) {
         table.innerHTML = html;
@@ -99,198 +83,483 @@ function displayImportOrders(filteredData = importOrders) {
 }
 
 // ============================================
-// BƯỚC 5: THÊM PHIẾU NHẬP MỚI
+// THÊM PHIẾU NHẬP MỚI
 // ============================================
 
 function addImportOrder() {
-    // Bước 1: Nhập tên nhà cung cấp
-    const supplier = prompt("Nhập tên nhà cung cấp:");
-    if (!supplier) return; // Nếu không nhập → Thoát hàm
+    const products = [];
+    let total = 0;
     
-    // Bước 2: Nhập số lượng sản phẩm
-    const items = parseInt(prompt("Số lượng sản phẩm:"));
-    // parseInt(): Chuyển chuỗi thành số nguyên
-    // VD: "5" → 5, "abc" → NaN
-    if (!items || items <= 0) {
-        alert("❌ Số lượng không hợp lệ!");
+    // Nhập ngày
+    const dateInput = prompt("Nhập ngày nhập hàng (YYYY-MM-DD):", new Date().toISOString().split('T')[0]);
+    if (!dateInput || !/^\d{4}-\d{2}-\d{2}$/.test(dateInput)) {
+        alert("❌ Ngày không hợp lệ!");
         return;
     }
     
-    // Bước 3: Nhập tổng tiền
-    const total = parseInt(prompt("Tổng tiền:"));
-    if (!total || total <= 0) {
-        alert("❌ Tổng tiền không hợp lệ!");
+    // Nhập sản phẩm (vòng lặp)
+    while (true) {
+        const productName = prompt("Nhập tên sản phẩm (hoặc bỏ trống để kết thúc):");
+        if (!productName || productName.trim() === "") break;
+        
+        const quantity = parseInt(prompt(`Số lượng ${productName}:`));
+        if (!quantity || quantity <= 0) {
+            alert("❌ Số lượng không hợp lệ!");
+            continue;
+        }
+        
+        // ✅ GIÁ NHẬP CỐ ĐỊNH = 100,000₫ (KHÔNG CHO NHẬP)
+        const importPrice = 100000;
+        console.log(`💰 Giá nhập mặc định: ${importPrice.toLocaleString()}₫`);
+                
+        products.push({
+            name: productName.trim(),
+            quantity: quantity,
+            importPrice: importPrice
+        });
+        
+        total += quantity * importPrice;
+        
+        const continueAdd = confirm(`✅ Đã thêm ${productName}\nTiếp tục thêm sản phẩm?`);
+        if (!continueAdd) break;
+    }
+    
+    if (products.length === 0) {
+        alert("❌ Phải có ít nhất 1 sản phẩm!");
         return;
     }
     
-    // Bước 4: Lấy ngày hiện tại
-    // new Date(): Tạo object ngày giờ hiện tại
-    // .toISOString(): Chuyển thành chuỗi dạng "2024-11-03T01:47:58.123Z"
-    // .split('T')[0]: Cắt lấy phần trước chữ T → "2024-11-03"
-    const today = new Date().toISOString().split('T')[0];
-    
-    // Bước 5: Tạo ID tự động
-    // importOrders.length + 1: Lấy số thứ tự tiếp theo
-    // String(...).padStart(3, '0'): Thêm số 0 vào đầu cho đủ 3 chữ số
-    // VD: 5 → "005" → "PN005"
     const newId = "PN" + String(importOrders.length + 1).padStart(3, '0');
     
-    // Bước 6: Thêm phiếu nhập mới vào mảng
     importOrders.push({
         id: newId,
-        supplier: supplier,
-        date: today,           // Ngày hiện tại
-        total: total,
-        status: "pending",     // Mặc định là "Chờ nhập"
-        items: items
+        date: dateInput,
+        status: "pending",
+        products: products,
+        total: total
     });
     
-    // ⭐⭐⭐ QUAN TRỌNG: LƯU DỮ LIỆU VÀO LOCALSTORAGE ⭐⭐⭐
-    // Nếu không có dòng này, khi refresh trang → dữ liệu mất
     saveImportOrders();
-    
-    // Hiển thị lại bảng với dữ liệu mới
     displayImportOrders();
-    alert("✅ Đã tạo phiếu nhập mới!");
+    alert(`✅ Đã tạo phiếu nhập ${newId}!\nTổng: ${total.toLocaleString()}₫`);
 }
 
 // ============================================
-// BƯỚC 6: SỬA PHIẾU NHẬP
+// SỬA PHIẾU NHẬP - CHỈ KHI PENDING
 // ============================================
 
 function editImport(index) {
-    const order = importOrders[index]; // Lấy phiếu nhập cần sửa
+    const order = importOrders[index];
     
-    // Sửa tên nhà cung cấp
-    const newSupplier = prompt("Nhập tên nhà cung cấp mới:", order.supplier);
-    if (newSupplier && newSupplier.trim() !== "") {
-        // .trim(): Xóa khoảng trắng đầu cuối
-        // VD: "  ABC  " → "ABC"
-        importOrders[index].supplier = newSupplier.trim();
-    }
-    
-    // Sửa số lượng sản phẩm
-    const newItems = parseInt(prompt("Nhập số lượng sản phẩm mới:", order.items));
-    if (newItems && newItems > 0) {
-        importOrders[index].items = newItems;
-    } else if (newItems !== null) {
-        // newItems !== null: User không nhấn Cancel
-        // Nghĩa là user nhập số không hợp lệ (≤ 0 hoặc NaN)
-        alert("❌ Số lượng không hợp lệ!");
+    // KIỂM TRA TRẠNG THÁI
+    if (order.status !== 'pending') {
+        alert("❌ Chỉ có thể sửa phiếu nhập chưa hoàn thành!");
         return;
     }
     
-    // Sửa tổng tiền
-    const newTotal = parseInt(prompt("Nhập tổng tiền mới:", order.total));
-    if (newTotal && newTotal > 0) {
-        importOrders[index].total = newTotal;
-    } else if (newTotal !== null) {
-        alert("❌ Tổng tiền không hợp lệ!");
-        return;
-    }
-    
-    // Hỏi có muốn đổi ngày nhập không
+    // 1️⃣ SỬA NGÀY (TÙY CHỌN)
     const changeDate = confirm("Bạn có muốn thay đổi ngày nhập không?");
     if (changeDate) {
         const newDate = prompt("Nhập ngày mới (YYYY-MM-DD):", order.date);
-        
-        // Kiểm tra định dạng ngày bằng Regular Expression (Regex)
-        // /^\d{4}-\d{2}-\d{2}$/: 
-        // ^ : Bắt đầu chuỗi
-        // \d{4} : 4 chữ số (năm)
-        // - : Dấu gạch ngang
-        // \d{2} : 2 chữ số (tháng)
-        // - : Dấu gạch ngang
-        // \d{2} : 2 chữ số (ngày)
-        // $ : Kết thúc chuỗi
         if (newDate && /^\d{4}-\d{2}-\d{2}$/.test(newDate)) {
-            importOrders[index].date = newDate;
-        } else if (newDate !== null) {
-            alert("❌ Định dạng ngày không hợp lệ! (YYYY-MM-DD)");
-            return;
+            order.date = newDate;
         }
     }
     
-    // ⭐⭐⭐ LƯU LẠI SAU KHI SỬA ⭐⭐⭐
-    saveImportOrders();
+    // 2️⃣ HIỂN THỊ DANH SÁCH SẢN PHẨM
+    let productList = "📦 Danh sách sản phẩm hiện tại:\n\n";
+    order.products.forEach((p, i) => {
+        productList += `${i + 1}. ${p.name} - SL: ${p.quantity} - Giá: ${p.importPrice.toLocaleString()}₫\n`;
+    });
+    alert(productList);
     
-    displayImportOrders();
-    alert("✅ Đã cập nhật phiếu nhập!");
-}
+    // 3️⃣ CHỌN SẢN PHẨM CẦN SỬA
+    const productIndex = parseInt(prompt("Nhập số thứ tự sản phẩm cần sửa (hoặc 0 để hủy):")) - 1;
+    
+    if (productIndex < 0 || productIndex >= order.products.length) {
+        alert("❌ Đã hủy sửa!");
+        return;
+    }
+    
+    const p = order.products[productIndex];
+    
+    // 4️⃣ SỬA THÔNG TIN SẢN PHẨM
+    const newName = prompt("Tên sản phẩm:", p.name);
+    if (newName && newName.trim() !== "") {
+        p.name = newName.trim();
+    }
+    
+    const newQty = parseInt(prompt("Số lượng:", p.quantity));
+    if (newQty && newQty > 0) {
+        p.quantity = newQty;
+    }
+    
+    const newPrice = parseInt(prompt("Giá nhập:", p.importPrice));
+    if (newPrice && newPrice > 0) {
+        p.importPrice = newPrice;
+    }
+    
+        // 5️⃣ TÍNH LẠI TỔNG
+    order.total = order.products.reduce((sum, p) => sum + (p.quantity * p.importPrice), 0);
 
+    // 6️⃣ CẬP NHẬT GIÁ VỐN VÀO BOOKSTORE_PRODUCTS
+    const defaultBooks = [
+        {id:1, title:"Tôi thấy hoa vàng trên cỏ xanh"},
+        {id:2, title:"Đắc nhân tâm"},
+        {id:3, title:"Nhà giả kim"},
+        {id:4, title:"Cho tôi xin một vé đi tuổi thơ"},
+        {id:5, title:"Dế mèn phiêu lưu ký"},
+        {id:6, title:"Tuổi thơ dữ dội"},
+        {id:7, title:"Số đỏ"},
+        {id:8, title:"Nỗi buồn chiến tranh"},
+        {id:9, title:"Tư duy nhanh và chậm"},
+        {id:10, title:"Tuổi trẻ đáng giá bao nhiêu"},
+        {id:11, title:"Khởi nghiệp 4.0"},
+        {id:12, title:"Hãy sống ở thể chủ động"},
+        {id:13, title:"Làm đĩ"},
+        {id:14, title:"Tôi tài giỏi, bạn cũng thế!"},
+        {id:15, title:"Kể chuyện trước giờ đi ngủ"},
+        {id:16, title:"Bộ não và tâm trí"},
+        {id:17, title:"Bạn đắt giá bao nhiêu?"},
+        {id:18, title:"Một đời như kẻ tìm đường"},
+        {id:19, title:"3 người thầy vĩ đại"},
+        {id:20, title:"Những tù nhân của địa lý"},
+        {id:21, title:"Tinh hoa trí tuệ do thái"},
+        {id:22, title:"Nghĩ giàu và làm giàu"},
+        {id:23, title:"Hiểu về trái tim"},
+        {id:24, title:"Đừng bao giờ đi ăn một mình"},
+        {id:25, title:"Đọc vị bất kì ai"},
+        {id:26, title:"Ra bờ suối ngắm hoa kèn hồng"},
+        {id:27, title:"Con chim xanh biếc quay về"}
+    ];
+
+    const bookName = p.name.toLowerCase().trim();
+    const defaultBook = defaultBooks.find(b => 
+        b.title.toLowerCase().trim() === bookName
+    );
+
+    if (defaultBook) {
+        const bookId = defaultBook.id;
+        const productCode = "SP" + String(bookId).padStart(3, '0');
+        
+        const products = JSON.parse(localStorage.getItem('bookstore_products') || '[]');
+        const productInAdmin = products.find(pr => pr.id === productCode);
+        
+        if (productInAdmin) {
+            productInAdmin.costPrice = p.importPrice;
+            const profitRate = productInAdmin.profitRate || 10;
+            const profit = (p.importPrice * profitRate) / 100;
+            productInAdmin.price = Math.round(p.importPrice + profit);
+            
+            localStorage.setItem('bookstore_products', JSON.stringify(products));
+            console.log(`💰 Đã cập nhật giá vốn ${p.name}: ${p.importPrice.toLocaleString()}₫ → Giá bán: ${productInAdmin.price.toLocaleString()}₫`);
+            
+            // ✅ TRIGGER SỰ KIỆN ĐỂ GIABAN.JS CẬP NHẬT
+            window.dispatchEvent(new Event('storage'));
+        }
+    }
+
+    saveImportOrders();
+    displayImportOrders();
+    alert("✅ Đã cập nhật phiếu nhập và giá vốn!");
+}
 // ============================================
-// BƯỚC 7: HOÀN THÀNH PHIẾU NHẬP
+// HOÀN THÀNH PHIẾU NHẬP - CẬP NHẬT TỒN KHO
 // ============================================
 
 function completeImport(index) {
-    // confirm(): Hiển thị popup có nút OK và Cancel
-    // Trả về true nếu user nhấn OK, false nếu nhấn Cancel
-    if (confirm("✅ Xác nhận hoàn thành phiếu nhập này?")) {
-        // Đổi trạng thái thành "completed"
-        importOrders[index].status = "completed";
+    if (confirm("✅ Xác nhận hoàn thành phiếu nhập?\nSau khi hoàn thành sẽ KHÔNG THỂ SỬA!")) {
+        const order = importOrders[index];
         
-        // ⭐⭐⭐ LƯU LẠI SAU KHI THAY ĐỔI TRẠNG THÁI ⭐⭐⭐
+        const adminProducts = JSON.parse(localStorage.getItem('bookstore_products') || '[]');
+        
+        const defaultBooks = [
+            {id:1, title:"Tôi thấy hoa vàng trên cỏ xanh", category:"Văn học"},
+            {id:2, title:"Đắc nhân tâm", category:"Tâm lý"},
+            {id:3, title:"Nhà giả kim", category:"Văn học"},
+            {id:4, title:"Cho tôi xin một vé đi tuổi thơ", category:"Thiếu nhi"},
+            {id:5, title:"Dế mèn phiêu lưu ký", category:"Thiếu nhi"},
+            {id:6, title:"Tuổi thơ dữ dội", category:"Văn học"},
+            {id:7, title:"Số đỏ", category:"Văn học"},
+            {id:8, title:"Nỗi buồn chiến tranh", category:"Văn học"},
+            {id:9, title:"Tư duy nhanh và chậm", category:"Tâm lý"},
+            {id:10, title:"Tuổi trẻ đáng giá bao nhiêu", category:"Tản văn"},
+            {id:11, title:"Khởi nghiệp 4.0", category:"Kinh tế"},
+            {id:12, title:"Hãy sống ở thể chủ động", category:"Tâm lý"},
+            {id:13, title:"Làm đĩ", category:"Văn học"},
+            {id:14, title:"Tôi tài giỏi, bạn cũng thế!", category:"Học tập"},
+            {id:15, title:"Kể chuyện trước giờ đi ngủ", category:"Thiếu nhi"},
+            {id:16, title:"Bộ não và tâm trí", category:"Tâm lý"},
+            {id:17, title:"Bạn đắt giá bao nhiêu?", category:"Tản văn"},
+            {id:18, title:"Một đời như kẻ tìm đường", category:"Tiểu sử"},
+            {id:19, title:"3 người thầy vĩ đại", category:"Tâm lý"},
+            {id:20, title:"Những tù nhân của địa lý", category:"Học tập"},
+            {id:21, title:"Tinh hoa trí tuệ do thái", category:"Kinh doanh"},
+            {id:22, title:"Nghĩ giàu và làm giàu", category:"Kinh doanh"},
+            {id:23, title:"Hiểu về trái tim", category:"Tâm lý"},
+            {id:24, title:"Đừng bao giờ đi ăn một mình", category:"Tâm lý"},
+            {id:25, title:"Đọc vị bất kì ai", category:"Tâm lý"},
+            {id:26, title:"Ra bờ suối ngắm hoa kèn hồng", category:"Văn học"},
+            {id:27, title:"Con chim xanh biếc quay về", category:"Tản văn"}
+        ];
+        
+        // ✅ ĐỌC INVENTORY HIỆN TẠI
+        let inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
+        
+        order.products.forEach(product => {
+            let bookId = null;
+            let bookCategory = null;
+            const bookName = product.name.toLowerCase().trim();
+            
+            const defaultBook = defaultBooks.find(b => 
+                b.title.toLowerCase().trim() === bookName
+            );
+            
+            if (defaultBook) {
+                bookId = defaultBook.id;
+                bookCategory = defaultBook.category;
+            } else {
+                const adminProduct = adminProducts.find(p => 
+                    p.name.toLowerCase().trim() === bookName && p.status === 'active'
+                );
+                if (adminProduct) {
+                    bookId = adminProduct.id;
+                    bookCategory = adminProduct.category;
+                }
+            }
+            
+            if (bookId) {
+                // ✅ TẠO productCode TRƯỚC
+                const productCode = "SP" + String(bookId).padStart(3, '0');
+                
+                // 1️⃣ CẬP NHẬT TỒN KHO (bookstore_stock)
+                const stockData = JSON.parse(localStorage.getItem('bookstore_stock') || '{}');
+                stockData[bookId] = (stockData[bookId] || 0) + product.quantity;
+                localStorage.setItem('bookstore_stock', JSON.stringify(stockData));
+                
+                // 2️⃣ CẬP NHẬT GIÁ VỐN VÀO BOOKSTORE_PRODUCTS
+                const products = JSON.parse(localStorage.getItem('bookstore_products') || '[]');
+                const productInAdmin = products.find(p => p.id === productCode);
+                if (productInAdmin) {
+                    productInAdmin.costPrice = product.importPrice;
+                    
+                    // ✅ TÍNH LẠI GIÁ BÁN
+                    const profitRate = productInAdmin.profitRate || 10;
+                    const profit = (product.importPrice * profitRate) / 100;
+                    productInAdmin.price = Math.round(product.importPrice + profit);
+                    
+                    console.log(`💰 Cập nhật giá vốn ${product.name}: ${product.importPrice.toLocaleString()}₫ → Giá bán: ${productInAdmin.price.toLocaleString()}₫`);
+                }
+                localStorage.setItem('bookstore_products', JSON.stringify(products));
+                
+                // 3️⃣ GHI LOG VÀO INVENTORY
+                inventory.push({
+                    id: productCode,
+                    name: product.name,
+                    category: bookCategory,
+                    date: order.date,
+                    type: "Nhập",
+                    quantity: product.quantity
+                });
+                
+                console.log(`✅ Cộng tồn kho: ${product.name} (ID: ${bookId}) +${product.quantity} → Tổng: ${stockData[bookId]}`);
+            } else {
+                console.warn(`⚠️ Không tìm thấy ID cho sản phẩm: ${product.name}`);
+            }
+        });
+        
+        // ✅ LƯU INVENTORY
+        localStorage.setItem('inventory', JSON.stringify(inventory));
+        
+        order.status = "completed";
         saveImportOrders();
-        
         displayImportOrders();
-        alert("✅ Đã hoàn thành phiếu nhập!");
+        
+        alert("✅ Đã hoàn thành phiếu nhập và cập nhật tồn kho!");
     }
 }
 
 // ============================================
-// BƯỚC 8: HỦY PHIẾU NHẬP
+// XÓA PHIẾU NHẬP
 // ============================================
 
-function cancelImport(index) {
-    if (confirm("❌ Bạn có chắc muốn hủy phiếu nhập này?")) {
-        // Đổi trạng thái thành "cancelled"
-        importOrders[index].status = "cancelled";
-        
-        // ⭐⭐⭐ LƯU LẠI SAU KHI THAY ĐỔI TRẠNG THÁI ⭐⭐⭐
+function deleteImport(index) {
+    if (confirm("❌ Bạn có chắc muốn xóa phiếu nhập này?")) {
+        importOrders.splice(index, 1);
         saveImportOrders();
-        
         displayImportOrders();
-        alert("❌ Đã hủy phiếu nhập!");
+        alert("✅ Đã xóa phiếu nhập!");
     }
 }
 
 // ============================================
-// BƯỚC 9: TÌM KIẾM/LỌC PHIẾU NHẬP
+// TÌM KIẾM
 // ============================================
 
 function filterImportOrders() {
-    // Lấy giá trị từ các ô input
     const dateInput = document.getElementById('importDate').value;
     const statusInput = document.getElementById('importStatus').value;
     
-    // Bắt đầu với toàn bộ dữ liệu
     let filtered = importOrders;
     
-    // Lọc theo ngày (nếu có nhập)
     if (dateInput) {
-        // .filter(): Tạo mảng mới chỉ chứa phần tử thỏa điều kiện
-        // o: Từng phiếu nhập trong mảng
-        // o.date === dateInput: So sánh ngày
         filtered = filtered.filter(o => o.date === dateInput);
     }
     
-    // Lọc theo trạng thái (nếu có chọn)
     if (statusInput) {
         filtered = filtered.filter(o => o.status === statusInput);
     }
     
-    // Hiển thị kết quả đã lọc (không cần saveImportOrders vì không sửa dữ liệu)
     displayImportOrders(filtered);
 }
 
 // ============================================
-// BƯỚC 10: KHỞI TẠO KHI TRANG LOAD
+// KHỞI TẠO DỮ LIỆU TỒN KHO BAN ĐẦU
 // ============================================
 
-// DOMContentLoaded: Sự kiện kích hoạt khi HTML đã load xong
+function initializeDefaultStock() {
+    const stockData = JSON.parse(localStorage.getItem('bookstore_stock') || '{}');
+    
+    // Nếu chưa có dữ liệu → Tạo tồn kho = 0 cho tất cả sách
+    if (Object.keys(stockData).length === 0) {
+        const defaultStock = {};
+        
+        // ✅ KHỞI TẠO TỒN KHO = 0 CHO TẤT CẢ 27 CUỐN
+        for (let i = 1; i <= 27; i++) {
+            defaultStock[i] = 0;
+        }
+        
+        localStorage.setItem('bookstore_stock', JSON.stringify(defaultStock));
+        console.log('✅ Đã khởi tạo tồn kho = 0 cho 27 cuốn sách');
+    }
+}
+
+// ============================================
+// KHỞI TẠO KHI TRANG LOAD
+// ============================================
+
 document.addEventListener('DOMContentLoaded', function() {
-    // Kiểm tra xem có phần tử importOrdersTable không (đang ở trang Quản lý Nhập hàng)
+    // ✅ KHỞI TẠO TỒN KHO
+    initializeDefaultStock();
+    // ✅ LOAD LẠI DỮ LIỆU TỪ LOCALSTORAGE (KHÔNG CÓ DỮ LIỆU MẪU)
+    importOrders = JSON.parse(localStorage.getItem('importOrders')) || [];
+    
+    // ✅ LƯU LẠI VÀO LOCALSTORAGE
+    saveImportOrders();
+    
+    // ✅ HIỂN THỊ
     if (document.getElementById('importOrdersTable')) {
-        displayImportOrders(); // Hiển thị dữ liệu từ localStorage
+        displayImportOrders();
     }
 });
+// ============================================
+// TỰ ĐỘNG ĐỒNG BỘ TỒN KHO CHO PHIẾU ĐÃ HOÀN THÀNH
+// ============================================
+
+// ============================================
+// TỰ ĐỘNG ĐỒNG BỘ TỒN KHO CHO PHIẾU ĐÃ HOÀN THÀNH (CHẠY 1 LẦN DUY NHẤT)
+// ============================================
+
+function syncCompletedOrders() {
+    // ✅ KIỂM TRA ĐÃ SYNC CHƯA
+    const syncedFlag = localStorage.getItem('inventory_synced');
+    if (syncedFlag === 'true') {
+        console.log('✅ Đã đồng bộ inventory trước đó, bỏ qua...');
+        return; // ← DỪNG LẠI, KHÔNG CHẠY NỮA
+    }
+    
+    const inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
+    const orders = JSON.parse(localStorage.getItem('importOrders') || '[]');
+    
+    const completedOrders = orders.filter(o => o.status === 'completed');
+    
+    // Lấy danh sách phiếu đã có trong inventory
+    const syncedOrderIds = new Set(inventory.map(i => i.orderId).filter(Boolean));
+    
+    let hasSync = false; // ← ĐẾM XEM CÓ SYNC GÌ KHÔNG
+    
+    completedOrders.forEach(order => {
+        // Nếu phiếu chưa được ghi vào inventory
+        if (!syncedOrderIds.has(order.id)) {
+            console.log(`🔄 Đang đồng bộ phiếu ${order.id}...`);
+            hasSync = true;
+            
+            const defaultBooks = [
+                {id:1, title:"Tôi thấy hoa vàng trên cỏ xanh", category:"Văn học"},
+                {id:2, title:"Đắc nhân tâm", category:"Tâm lý"},
+                {id:3, title:"Nhà giả kim", category:"Văn học"},
+                {id:4, title:"Cho tôi xin một vé đi tuổi thơ", category:"Thiếu nhi"},
+                {id:5, title:"Dế mèn phiêu lưu ký", category:"Thiếu nhi"},
+                {id:6, title:"Tuổi thơ dữ dội", category:"Văn học"},
+                {id:7, title:"Số đỏ", category:"Văn học"},
+                {id:8, title:"Nỗi buồn chiến tranh", category:"Văn học"},
+                {id:9, title:"Tư duy nhanh và chậm", category:"Tâm lý"},
+                {id:10, title:"Tuổi trẻ đáng giá bao nhiêu", category:"Tản văn"},
+                {id:11, title:"Khởi nghiệp 4.0", category:"Kinh tế"},
+                {id:12, title:"Hãy sống ở thể chủ động", category:"Tâm lý"},
+                {id:13, title:"Làm đĩ", category:"Văn học"},
+                {id:14, title:"Tôi tài giỏi, bạn cũng thế!", category:"Học tập"},
+                {id:15, title:"Kể chuyện trước giờ đi ngủ", category:"Thiếu nhi"},
+                {id:16, title:"Bộ não và tâm trí", category:"Tâm lý"},
+                {id:17, title:"Bạn đắt giá bao nhiêu?", category:"Tản văn"},
+                {id:18, title:"Một đời như kẻ tìm đường", category:"Tiểu sử"},
+                {id:19, title:"3 người thầy vĩ đại", category:"Tâm lý"},
+                {id:20, title:"Những tù nhân của địa lý", category:"Học tập"},
+                {id:21, title:"Tinh hoa trí tuệ do thái", category:"Kinh doanh"},
+                {id:22, title:"Nghĩ giàu và làm giàu", category:"Kinh doanh"},
+                {id:23, title:"Hiểu về trái tim", category:"Tâm lý"},
+                {id:24, title:"Đừng bao giờ đi ăn một mình", category:"Tâm lý"},
+                {id:25, title:"Đọc vị bất kì ai", category:"Tâm lý"},
+                {id:26, title:"Ra bờ suối ngắm hoa kèn hồng", category:"Văn học"},
+                {id:27, title:"Con chim xanh biếc quay về", category:"Tản văn"}
+            ];
+            
+            order.products.forEach(product => {
+                const bookName = product.name.toLowerCase().trim();
+                const defaultBook = defaultBooks.find(b => 
+                    b.title.toLowerCase().trim() === bookName
+                );
+                
+                if (defaultBook) {
+                    const bookId = defaultBook.id;
+                    const productCode = "SP" + String(bookId).padStart(3, '0');
+                    
+                    // ✅ CẬP NHẬT TỒN KHO
+                    const stockData = JSON.parse(localStorage.getItem('bookstore_stock') || '{}');
+                    stockData[bookId] = (stockData[bookId] || 0) + product.quantity;
+                    localStorage.setItem('bookstore_stock', JSON.stringify(stockData));
+                    
+                    // ✅ GHI LOG VÀO INVENTORY
+                    inventory.push({
+                        id: productCode,
+                        name: product.name,
+                        category: defaultBook.category,
+                        date: order.date,
+                        type: "Nhập",
+                        quantity: product.quantity,
+                        orderId: order.id
+                    });
+                    console.log(`✅ Đã sync: ${product.name} từ ${order.id} → Tồn: ${stockData[bookId]}`);
+                }
+            });
+        }
+    });
+    
+    if (hasSync) {
+        localStorage.setItem('inventory', JSON.stringify(inventory));
+        localStorage.setItem('inventory_synced', 'true'); // ← ĐÁNH DẤU ĐÃ SYNC
+        console.log('✅ Hoàn tất đồng bộ, đánh dấu để không chạy lại!');
+    }
+}
+
+// Gọi khi load trang
+syncCompletedOrders();
+// ============================================
+// RESET BỘ LỌC
+// ============================================
+
+function resetFilter() {
+    document.getElementById('importDate').value = '';
+    document.getElementById('importStatus').value = '';
+    displayImportOrders(); // Hiển thị tất cả
+}

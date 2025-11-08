@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -13,7 +12,7 @@
     <script src="giaban.js" defer></script>
     <script src="tonkho.js" defer></script>
     <script src="nhaphang.js" defer></script>
-    <script src="sanpham.js" defer></script>
+    <script src="sanpham_admin.js" defer></script>
     <script src="loaisach.js" defer></script>
     
 </head>
@@ -42,7 +41,7 @@
             <li class="menu-item">
                 <a class="menu-link" onclick="openPage('products')">
                     <i class='bx bx-book'></i>
-                    <span>Quản lý Sản phẩm</span>
+                    <span>Quản lý Danh mục Sách</span>
                 </a>
             </li>
             <li class="menu-item">
@@ -143,8 +142,6 @@
                     <tr>
                         <th>Mã loại</th>
                         <th>Tên loại sách</th>
-                        <th>Mô tả</th>
-                        <th>Số sản phẩm</th>
                         <th>Trạng thái</th>
                         <th>Thao tác</th>
                     </tr>
@@ -156,101 +153,172 @@
     </div>
 </div>
 
-<!-- Products Page -->
-<div class="page-content" id="products">
-    <div class="page-navbar">
-        <button class="back-btn" onclick="backToMenu()">
-            <i class='bx bx-arrow-back'></i>
-            Quay lại Menu
-        </button>
-    </div>
-    
-    <div class="management-container">
-        <div class="page-header">
-            <h1>📚 Quản lý Sản phẩm</h1>
-            <p>Thêm, sửa, ẩn/hiện sản phẩm</p>
-        </div>
-
-        <div class="action-bar">
-            <button class="btn btn-primary" onclick="addProduct()">
-                <i class='bx bx-plus'></i> Thêm sản phẩm mới
+    <!-- Products Page -->
+    <div class="page-content" id="products">
+        <div class="page-navbar">
+            <button class="back-btn" onclick="backToMenu()">
+                <i class='bx bx-arrow-back'></i>
+                Quay lại Menu
             </button>
         </div>
-
-        <div class="data-table-container">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Mã SP</th>
-                        <th>Tên sản phẩm</th>
-                        <th>Loại sách</th>
-                        <th>Giá bán</th>
-                        <th>Tồn kho</th>
-                        <th>Trạng thái</th>
-                        <th>Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody id="productsTable">
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-    <!-- Imports Page -->
-<div class="page-content" id="imports">
-    <div class="page-navbar">
-        <button class="back-btn" onclick="backToMenu()">
-            <i class='bx bx-arrow-back'></i>
-            Quay lại Menu
-        </button>
-    </div>
     
-    <div class="management-container">
-        <div class="page-header">
-            <h1>📦 Quản lý Nhập hàng</h1>
-            <p>Hiển thị, tìm kiếm và quản lý phiếu nhập hàng</p>
-        </div>
+        <div class="management-container">
+            <div class="page-header">
+                <h1>📦 Quản lý Sản phẩm</h1>
+                <p>Thêm, sửa, ẩn/hiện sản phẩm</p>
+            </div>
 
-        <div class="action-bar">
-            <button class="btn btn-primary" onclick="addImportOrder()">
-                <i class='bx bx-plus'></i> Tạo phiếu nhập mới
-            </button>
-            <div class="filter-group">
-                <input type="date" id="importDate">
-                <select id="importStatus">
-                    <option value="">Tất cả trạng thái</option>
-                    <option value="pending">Chờ nhập</option>
-                    <option value="completed">Đã hoàn thành</option>
-                    <option value="cancelled">Đã hủy</option>
-                </select>
-                <button class="btn btn-primary" onclick="filterImportOrders()">
-                    <i class='bx bx-search'></i> Tìm kiếm
+            <div class="action-bar">
+                <button class="btn btn-primary" onclick="openAddProductModal()">
+                    <i class='bx bx-plus'></i> Thêm sản phẩm mới
                 </button>
+            </div>
+
+            <div class="data-table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Mã SP</th>
+                            <th>Hình</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Loại</th>
+                            <th>Mô tả</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsTable">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+            <!-- Modal Thêm Sản Phẩm -->
+        <div id="addProductModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>✨ Thêm Sản Phẩm Mới</h2>
+                    <span class="close" onclick="closeAddProductModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <form id="addProductForm">
+                        <div class="form-group">
+                            <label>Mã sản phẩm: *</label>
+                            <input type="text" id="newProductId" readonly class="input-readonly">
+                            <small class="form-hint">Mã sẽ tự động tạo dựa trên mã sản phẩm cuối cùng</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Loại sản phẩm: *</label>
+                            <select id="newProductCategory" required>
+                                <option value="">Chọn loại</option>
+                                <option value="Văn học">Văn học</option>
+                                <option value="Kỹ năng sống">Kỹ năng sống</option>
+                                <option value="Thiếu nhi">Thiếu nhi</option>
+                                <option value="Khoa học">Khoa học</option>
+                                <option value="Kinh tế">Kinh tế</option>
+                                <option value="Tâm lý">Tâm lý</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Tên sản phẩm: *</label>
+                            <input type="text" id="newProductName" placeholder="Nhập tên sản phẩm" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Địa chỉ liên kết hình ảnh (URL): *</label>
+                            <input type="url" id="newProductImage" placeholder="https://example.com/image.jpg" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Xem trước hình ảnh:</label>
+                            <div class="image-preview-container">
+                                <img id="newProductImagePreview" src="" alt="Preview" style="display: none;">
+                                <p id="noImagePreview" class="no-preview">Ảnh sẽ hiển thị ở đây sau khi nhập URL</p>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Mô tả sản phẩm: *</label>
+                            <textarea id="newProductDescription" rows="4" placeholder="Nhập mô tả chi tiết sản phẩm" required></textarea>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" onclick="closeAddProductModal()">Hủy bỏ</button>
+                            <button type="submit" class="btn btn-primary">💾 Lưu sản phẩm</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
 
-        <div class="data-table-container">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Mã phiếu</th>
-                        <th>Nhà cung cấp</th>
-                        <th>Ngày nhập</th>
-                        <th>Số sản phẩm</th>
-                        <th>Tổng tiền</th>
-                        <th>Trạng thái</th>
-                        <th>Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody id="importOrdersTable">
-                </tbody>
-            </table>
+        <!-- Modal Sửa Sản Phẩm -->
+        <div id="editProductModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>✏️ Sửa Thông Tin Sản Phẩm</h2>
+                    <span class="close" onclick="closeEditProductModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <form id="editProductForm">
+                        <input type="hidden" id="editProductIndex">
+                        
+                        <div class="form-group">
+                            <label>Mã sản phẩm: *</label>
+                            <input type="text" id="editProductId" readonly class="input-readonly">
+                            <small class="form-hint">🔒 Không sửa được</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Loại sản phẩm: *</label>
+                            <select id="editProductCategory" required>
+                                <option value="">Chọn loại</option>
+                                <option value="Văn học">Văn học</option>
+                                <option value="Kỹ năng sống">Kỹ năng sống</option>
+                                <option value="Thiếu nhi">Thiếu nhi</option>
+                                <option value="Khoa học">Khoa học</option>
+                                <option value="Kinh tế">Kinh tế</option>
+                                <option value="Tâm lý">Tâm lý</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Tên sản phẩm: *</label>
+                            <input type="text" id="editProductName" placeholder="Nhập tên sản phẩm" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Địa chỉ liên kết hình ảnh (URL): *</label>
+                            <input type="url" id="editProductImage" placeholder="https://example.com/image.jpg" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Xem trước hình ảnh hiện tại:</label>
+                            <div class="image-preview-container">
+                                <img id="editProductImagePreview" src="" alt="Preview">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Mô tả sản phẩm: *</label>
+                            <textarea id="editProductDescription" rows="4" placeholder="Nhập mô tả chi tiết sản phẩm" required></textarea>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" onclick="closeEditProductModal()">Hủy bỏ</button>
+                            <button type="submit" class="btn btn-primary">💾 Cập nhật</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
-</div>
+    
 
-    <!-- Pricing Page -->
-    <div class="page-content" id="pricing">
+
+
+    <!-- Imports Page -->
+    <div class="page-content" id="imports">
         <div class="page-navbar">
             <button class="back-btn" onclick="backToMenu()">
                 <i class='bx bx-arrow-back'></i>
@@ -260,45 +328,118 @@
         
         <div class="management-container">
             <div class="page-header">
-                <h1>💰 Quản lý Giá bán</h1>
-                <p>Nhập/sửa tỷ lệ lợi nhuận và tra cứu giá bán</p>
-            </div>
-    
-            <!-- Cài đặt tỷ lệ lợi nhuận -->
-            <div class="profit-setting-card">
-                <h3>⚙️ Cài đặt Tỷ lệ Lợi nhuận Mặc định</h3>
-                <div class="profit-input-group">
-                    <label>Tỷ lệ lợi nhuận (%):</label>
-                    <input type="number" id="profitRate" value="30" min="0" max="100">
-                    <button class="btn btn-primary" onclick="updateProfitRate()">
-                        <i class='bx bx-save'></i> Lưu
-                    </button>
-                </div>
-                <p class="note">Hiện tại: <strong id="currentProfitRate">30%</strong></p>
+                <h1>📦 Quản lý Nhập hàng</h1>
+                <p>Hiển thị, tìm kiếm và quản lý phiếu nhập hàng</p>
             </div>
 
-             <!-- Bảng tra cứu giá -->
-             <div class="data-table-container">
+            <div class="action-bar">
+                <button class="btn btn-primary" onclick="addImportOrder()">
+                    <i class='bx bx-plus'></i> Tạo phiếu nhập mới
+                </button>
+                <div class="filter-group">
+                    <input type="date" id="importDate">
+                    <select id="importStatus">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="pending">Chờ nhập</option>
+                        <option value="completed">Đã hoàn thành</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="filterImportOrders()">
+                        <i class='bx bx-search'></i> Tìm kiếm
+                    </button>
+                    <button class="btn btn-secondary" onclick="resetFilter()">
+                        <i class='bx bx-refresh'></i> Hiển thị tất cả
+                    </button>
+                </div>
+            </div>
+
+            <div class="data-table-container">
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Mã sách</th>
-                            <th>Tên sách</th>
-                            <th>Giá vốn (₫)</th>
-                            <th>Tỷ lệ LN (%)</th>
-                            <th>Lợi nhuận (₫)</th>
-                            <th>Giá bán (₫)</th>
+                            <th>Mã phiếu</th>
+                            <th>Ngày nhập</th>
+                            <th>Sản phẩm (SL × Giá = Thành tiền)</th>
+                            <th>Tổng tiền nhập</th>
+                            <th>Trạng thái</th>
                             <th>Thao tác</th>
                         </tr>
                     </thead>
-                    <tbody id="pricingTable">
+                    <tbody id="importOrdersTable">
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <!-- ========================= ORDERS PAGE - CẬP NHẬT ========================= -->
+       <!-- Pricing Page -->
+<div class="page-content" id="pricing">
+    <div class="page-navbar">
+        <button class="back-btn" onclick="backToMenu()">
+            <i class='bx bx-arrow-back'></i>
+            Quay lại Menu
+        </button>
+    </div>
+    
+    <div class="management-container">
+        <div class="page-header">
+            <h1>💰 Quản lý Giá bán</h1>
+            <p>Nhập/sửa tỷ lệ lợi nhuận và tra cứu giá bán</p>
+        </div>
+
+        <!-- ⭐ CHỈ GIỮ PHẦN CẬP NHẬT THEO LOẠI ⭐ -->
+        <div class="profit-setting-card">
+            <h3>⚙️ Cập nhật Tỷ lệ Lợi nhuận theo Loại sách</h3>
+            
+            <div class="profit-input-group">
+                <label>Chọn loại sách:</label>
+                <select id="categorySelect" style="width: 180px;">
+                    <option value="">Chọn loại...</option>
+                    <option value="Văn học">Văn học</option>
+                    <option value="Kỹ năng sống">Kỹ năng sống</option>
+                    <option value="Thiếu nhi">Thiếu nhi</option>
+                    <option value="Khoa học">Khoa học</option>
+                    <option value="Lịch sử">Lịch sử</option>
+                    <option value="Kinh dị">Kinh dị</option>
+                </select>
+                <input type="number" id="categoryRate" placeholder="Nhập %" min="0" max="100" style="width: 100px;">
+                <button class="btn btn-primary" onclick="updateCategoryRate()">
+                    <i class='bx bx-save'></i> Áp dụng cho loại
+                </button>
+            </div>
+        </div>
+
+        <!-- ⭐ CHỈ GIỮ NÚT TÌM KIẾM ⭐ -->
+        <div class="action-bar" style="margin-bottom: 15px;">
+            <div class="filter-group">
+                <input type="text" id="searchPricing" placeholder="🔍 Tìm theo mã hoặc tên sách..." style="min-width: 300px;">
+                <button class="btn btn-primary" onclick="searchPricing()">
+                    <i class='bx bx-search'></i> Tìm kiếm
+                </button>
+            </div>
+        </div>
+
+        <!-- ⭐ BẢNG ĐÃ XÓA CỘT THAO TÁC ⭐ -->
+        <div class="data-table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Mã sách</th>
+                        <th>Tên sách</th>
+                        <th>Loại sách</th>
+                        <th>Giá vốn (₫)</th>
+                        <th>Tỷ lệ LN (%)</th>
+                        <th>Lợi nhuận (₫)</th>
+                        <th>Giá bán (₫)</th>
+                        <!-- ❌ XÓA CỘT THAO TÁC -->
+                    </tr>
+                </thead>
+                <tbody id="pricingTable"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+     <!-- ⭐ ORDERS PAGE - ĐÃ SỬA ⭐ -->
     <div class="page-content" id="orders">
         <div class="page-navbar">
             <button class="back-btn" onclick="backToMenu()">
@@ -315,14 +456,16 @@
     
             <div class="action-bar">
                 <div class="filter-group">
-                    <input type="date" id="orderDate">
+                    <!-- ⭐ THAY ĐỔI: 2 ô date thay vì 1 ô -->
+                    <input type="date" id="orderDateFrom">
+                    <span>đến</span>
+                    <input type="date" id="orderDateTo">
                     <select id="orderStatus">
                         <option value="">Tất cả trạng thái</option>
-                        <option value="pending">Chờ xử lý</option>
-                        <option value="confirmed">Đã xác nhận</option>
-                        <option value="shipping">Đang giao</option>
-                        <option value="completed">Hoàn thành</option>
-                        <option value="cancelled">Đã hủy</option>
+                        <option value="pending">Mới đặt </option>
+                        <option value="confirmed">Đã xử lý </option>
+                        <option value="shipping">Đã giao</option>
+                        <option value="completed">Hủy</option>
                     </select>
                     <button class="btn btn-primary" onclick="filterOrders()">
                         <i class='bx bx-search'></i> Tìm kiếm
@@ -342,16 +485,16 @@
                             <th>Thao tác</th>
                         </tr>
                     </thead>
-                    <tbody id="ordersTable">
-                    </tbody>
+                    <tbody id="ordersTable"></tbody>
                 </table>
             </div>
         </div>
     </div>
+
     
 
-   <!-- ========================= INVENTORY PAGE - CẬP NHẬT ========================= -->
-   <div class="page-content" id="inventory">
+<!-- INVENTORY PAGE -->
+<div class="page-content" id="inventory">
     <div class="page-navbar">
         <button class="back-btn" onclick="backToMenu()">
             <i class='bx bx-arrow-back'></i>
@@ -360,71 +503,102 @@
     </div>
     
     <div class="management-container">
+        <!-- HEADER -->
         <div class="page-header">
             <h1>📊 Quản lý Tồn kho</h1>
             <p>Tra cứu số lượng tồn và cảnh báo sắp hết hàng</p>
         </div>
 
-        <!-- Thống kê tổng quan -->
-        <div class="inventory-stats">
-            <div class="stat-box">
-                <i class='bx bx-package'></i>
-                <div>
-                    <h3 id="totalProducts">0</h3>
-                    <p>Tổng sản phẩm</p>
-                </div>
-            </div>
-            <div class="stat-box warning">
-                <i class='bx bx-error'></i>
-                <div>
-                    <h3 id="lowStockCount">0</h3>
-                    <p>Sắp hết hàng</p>
-                </div>
-            </div>
-            <div class="stat-box success">
-                <i class='bx bx-check-circle'></i>
-                <div>
-                    <h3 id="inStockCount">0</h3>
-                    <p>Đủ hàng</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Bộ lọc -->
+        <!-- BỘ LỌC 1: THEO MÃ SẢN PHẨM -->
         <div class="action-bar">
             <div class="filter-group">
+                <input type="text" id="searchProductId" placeholder="🔍 Mã sản phẩm (VD: SP001)">
+                <select id="transactionType">
+                    <option value="">Tất cả</option>
+                    <option value="Nhập">Nhập</option>
+                    <option value="Xuất">Xuất</option>
+                    <option value="Tồn">Tồn</option>
+                </select>
                 <input type="date" id="inventoryFromDate">
                 <span>đến</span>
                 <input type="date" id="inventoryToDate">
-                <select id="inventoryFilter">
-                    <option value="all">Tất cả</option>
-                    <option value="low">Sắp hết hàng</option>
-                    <option value="normal">Đủ hàng</option>
-                </select>
                 <button class="btn btn-primary" onclick="filterInventory()">
                     <i class='bx bx-search'></i> Lọc
                 </button>
             </div>
         </div>
 
+        <!-- BỘ LỌC 2: THEO LOẠI SÁCH -->
+        <div class="action-bar">
+            <div class="filter-group">
+                <select id="categoryFilter">
+                    <option value="">Chọn loại sách</option>
+                    <option value="Giáo khoa">Giáo khoa</option>
+                    <option value="Văn học">Văn học</option>
+                    <option value="Kỹ năng sống">Kỹ năng sống</option>
+                    <option value="Thiếu nhi">Thiếu nhi</option>
+                    <option value="Khoa học">Khoa học</option>
+                    <option value="Lịch sử">Lịch sử</option>
+                    <option value="Kinh dị">Kinh dị</option>
+                </select>
+                <select id="categoryTransactionType">
+                    <option value="">Tất cả</option>
+                    <option value="Nhập">Nhập</option>
+                    <option value="Xuất">Xuất</option>
+                    <option value="Tồn">Tồn</option>
+                </select>
+                <input type="date" id="categoryFromDate">
+                <span>đến</span>
+                <input type="date" id="categoryToDate">
+                <button class="btn btn-primary" onclick="filterByCategory()">
+                    <i class='bx bx-filter'></i> Lọc theo loại sách
+                </button>
+            </div>
+        </div>
+
+        <!-- BẢNG DỮ LIỆU -->
         <div class="data-table-container">
             <table class="data-table">
                 <thead>
                     <tr>
                         <th>Mã sách</th>
                         <th>Tên sách</th>
-                        <th>Tồn đầu kỳ</th>
-                        <th>Nhập trong kỳ</th>
-                        <th>Xuất trong kỳ</th>
-                        <th>Tồn cuối kỳ</th>
-                        <th>Trạng thái</th>
+                        <th>Loại sách</th>
+                        <th>Ngày</th>
+                        <th>Loại giao dịch</th>
+                        <th>Số lượng</th>
                     </tr>
                 </thead>
-                <tbody id="inventoryTable">
+                <tbody id="inventoryTable"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- POPUP KẾT QUẢ LỌC MÃ SẢN PHẨM -->
+<div id="resultPopup" class="result-popup">
+    <div class="popup-overlay" onclick="closeResultPopup()"></div>
+    <div class="popup-box">
+        <div class="popup-header">
+            <h2>✅ KẾT QUẢ TRA CỨU</h2>
+            <button class="close-btn" onclick="closeResultPopup()">
+                <i class='bx bx-x'></i>
+            </button>
+        </div>
+        <div class="popup-body">
+            <table class="result-table">
+                <tbody id="resultTableBody">
+                    <!-- Kết quả động -->
                 </tbody>
             </table>
         </div>
+        <div class="popup-footer">
+            <button class="btn btn-danger" onclick="closeResultPopup()">
+                <i class='bx bx-x-circle'></i> Đóng kết quả
+            </button>
+        </div>
+    </div>
 </div>
-
+</div>
 </body>
 </html>

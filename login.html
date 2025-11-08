@@ -246,56 +246,62 @@
   </div>
 
   <script>
-    // Dữ liệu tài khoản demo
-    const adminAccounts = [
-      { username: 'admin', password: 'admin123', name: 'Admin' },
-    ];
-
+    // ==================== ĐỌC TỪ HỆ THỐNG USER CHUNG ====================
+    function getUsers() {
+      return JSON.parse(localStorage.getItem('users') || '[]');
+    }
+  
     const loginForm = document.getElementById('loginForm');
     const alertBox = document.getElementById('alertBox');
     const alertMessage = document.getElementById('alertMessage');
-
+  
     // Hàm hiển thị thông báo
     function showAlert(message, type = 'error') {
-      // Thêm class để hiển thị alert với kiểu màu (error hoặc success)
       alertBox.classList.add('show');
-      alertBox.classList.add(type);  //này để css hiện màu
-      alertMessage.textContent = message;  //textContent là có sẵn html, nó hiện thông báo 
-      // Sau 3 giây, ẩn alert và xóa class kiểu
+      alertBox.classList.add(type);
+      alertMessage.textContent = message;
+      
       setTimeout(function() {
         alertBox.classList.remove('show');
         alertBox.classList.remove(type);
       }, 3000);
     }
-
-    // Xử lý đăng nhập
+  
+    // ✅ ĐĂNG NHẬP ADMIN
     loginForm.addEventListener('submit', function(e) {
-      e.preventDefault();  // ngăn reload trang web
+      e.preventDefault();
+      
       const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value;
-      const rememberMe = document.getElementById('rememberMe').checked; //checked là true or false đều phụ thuộc vào checkbox
-      // Kiểm tra tài khoản
-      const account = adminAccounts.find(
-        acc => acc.username === username && acc.password === password  //acc là biến tạm
-      );
-
-      if (account) {
-        // Đăng nhập thành công
+      const rememberMe = document.getElementById('rememberMe').checked;
+      
+      // ✅ ĐỌC TỪ USERS[]
+      const users = getUsers();
+      const user = users.find(u => u.username === username && u.password === password);
+      
+      if (user && user.role === 'admin') {
+        // ✅ LÀ ADMIN
         showAlert('Đăng nhập thành công!' , 'success');
-        // Lưu thông tin vào localStorage, chỗ này k lưu password vì bảo mật
-        const loginData = { username: account.username, name: account.name };
-        localStorage.setItem('adminLoggedIn', 'true');  // thực ra là localStorage.setItem('username', 'admin'); nhưng true là để dashboard kiểm tra coi đc chx
-        localStorage.setItem('adminInfo', JSON.stringify(loginData));  // vì localStorage chỉ lưu chuỗi nên ms có JSON.stringify()
+        
+        localStorage.setItem('adminLoggedIn', 'true');
+        localStorage.setItem('adminInfo', JSON.stringify({
+          username: user.username,
+          name: user.name
+        }));
+        
         if (rememberMe) {
           localStorage.setItem('rememberMe', 'true');
         }
-        // Chuyển hướng sau 1 giây
+        
         setTimeout(() => {
           location.href = 'index.html';
         }, 1000);
         
+      } else if (user) {
+        // ✅ ĐĂNG NHẬP ĐÚNG NHƯNG KHÔNG PHẢI ADMIN
+        showAlert('❌ Tài khoản này không có quyền Admin!');
       } else {
-        // Đăng nhập thất bại
+        // ❌ SAI THÔNG TIN
         showAlert('Tên đăng nhập hoặc mật khẩu không đúng!');
       }
     });

@@ -1,181 +1,393 @@
-// ============================================
-// BƯỚC 1: ĐỌC DỮ LIỆU TỪ LOCALSTORAGE
-// ============================================
+/* ================================================= */
+/* ==== ĐỌC LOẠI SÁCH TỪ BOOKS[] VÀ ĐỒNG BỘ ===== */
+/* ================================================= */
 
-// JSON.parse(): Chuyển chuỗi JSON thành mảng object
-// localStorage.getItem('categories'): Lấy dữ liệu đã lưu với key là 'categories'
-// || [...]: Nếu localStorage trống (null), dùng dữ liệu mặc định bên dưới
-let categories = JSON.parse(localStorage.getItem('categories')) || [
-    // Dữ liệu mặc định chỉ chạy lần đầu tiên khi chưa có dữ liệu trong localStorage
-    { id: "LS001", name: "Văn học", description: "Sách văn học trong và ngoài nước", status: "active", productCount: 15 },
-    { id: "LS002", name: "Kinh tế", description: "Sách về kinh doanh và tài chính", status: "active", productCount: 8 },
-    { id: "LS003", name: "Kỹ năng sống", description: "Sách phát triển bản thân", status: "active", productCount: 12 },
-    { id: "LS004", name: "Thiếu nhi", description: "Sách dành cho trẻ em", status: "active", productCount: 20 },
-    { id: "LS005", name: "Khoa học", description: "Sách khoa học tự nhiên và xã hội", status: "hidden", productCount: 5 },
+// Danh sách loại sách thực tế từ mảng books (copy từ trang User)
+const booksCategories = [
+    "Văn học", "Tâm lý", "Thiếu nhi", "Tản văn", 
+    "Học tập", "Kinh tế", "Kinh doanh", "Tiểu sử"
 ];
 
-// ============================================
-// BƯỚC 2: HÀM LƯU DỮ LIỆU VÀO LOCALSTORAGE
-// ============================================
+function generateNewId() {
+    let max = 0;
+    categories.forEach(cat => {
+        const m = cat.id && cat.id.match(/LS0*([0-9]+)/i);
+        if (m && m[1]) {
+            const n = parseInt(m[1], 10);
+            if (!isNaN(n) && n > max) max = n;
+        }
+    });
+    const next = max + 1;
+    return "LS" + String(next).padStart(3, '0');
+} 
+function initCategoriesFromBooks() {
+    const stored = localStorage.getItem('categories');
+    
+    if (!stored) {
+        // ✅ Lần đầu: Tạo từ danh sách books
+        const defaultCategories = booksCategories.map((name, index) => ({
+            id: "LS" + String(index + 1).padStart(3, '0'),
+            name: name,
+            status: "active"
+        }));
+        localStorage.setItem('categories', JSON.stringify(defaultCategories));
+        return defaultCategories;
+    }
+    
+    try {
+        // ✅ CÓ localStorage → DÙNG LUÔN, KHÔNG THÊM GÌ CẢ!
+        return JSON.parse(stored);
+        
+    } catch (e) {
+        console.error('Lỗi đọc categories:', e);
+        // Chỉ khi lỗi parse mới dùng fallback
+        const fallback = booksCategories.map((name, index) => ({
+            id: "LS" + String(index + 1).padStart(3, '0'),
+            name: name,
+            status: "active"
+        }));
+        localStorage.setItem('categories', JSON.stringify(fallback));
+        return fallback;
+    }
+}
+
+
 
 function saveCategories() {
-    // JSON.stringify(): Chuyển mảng categories thành chuỗi JSON để lưu
-    // localStorage.setItem(): Lưu dữ liệu với key là 'categories'
-    // ⭐ Hàm này PHẢI được gọi sau mỗi lần thêm/sửa/xóa/ẩn/hiện dữ liệu
     localStorage.setItem('categories', JSON.stringify(categories));
 }
 
-// ============================================
-// BƯỚC 3: HIỂN THỊ DANH SÁCH LOẠI SÁCH
-// ============================================
 
-// Hiển thị danh sách loại sách
-// filteredData: Dữ liệu đã lọc (hoặc toàn bộ nếu không lọc)
+
+function escapeHtml(text) {
+    if (!text && text !== 0) return '';
+    return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+// Hiển thị danh sách loại sách (4 cột) — Mã, Tên, Trạng thái, Thao tác
 function displayCategories(filteredData = categories) {
     let html = '';
-    
-    // forEach(): Duyệt qua từng loại sách
-    // cat: Loại sách hiện tại
-    // index: Vị trí trong mảng (0, 1, 2, ...)
     filteredData.forEach((cat, index) => {
-        // Tạo badge hiển thị trạng thái
-        const statusBadge = cat.status === 'active' 
-            ? '<span class="badge success">Hiển thị</span>'  // Màu xanh nếu active
-            : '<span class="badge danger">Ẩn</span>';        // Màu đỏ nếu hidden
+        const statusBadge = cat.status === 'active'
+            ? '<span class="badge success">Hiển thị</span>'
+            : '<span class="badge danger">Ẩn</span>';
         
-        // Tạo HTML cho mỗi dòng trong bảng
         html += `<tr>`;
-        html += `<td><strong>${cat.id}</strong></td>`;
-        html += `<td>${cat.name}</td>`;
-        html += `<td>${cat.description}</td>`;
-        html += `<td>${cat.productCount}</td>`;
+        html += `<td><strong>${escapeHtml(cat.id)}</strong></td>`;
+        html += `<td>${escapeHtml(cat.name)}</td>`;
         html += `<td>${statusBadge}</td>`;
+        // Thao tác: Sửa | Ẩn/Hiện | Xóa
         html += `<td>
                     <div class="action-btns">
                         <button class="btn-icon edit" onclick="editCategory(${index})" title="Sửa">
                             <i class='bx bx-edit'></i>
                         </button>
-                        <button class="btn-icon delete" onclick="toggleCategoryStatus(${index})" title="${cat.status === 'active' ? 'Ẩn' : 'Hiện'}">
+                        <button class="btn-icon toggle" onclick="toggleCategoryStatus(${index})" title="${cat.status === 'active' ? 'Ẩn' : 'Hiện'}">
                             <i class='bx ${cat.status === 'active' ? 'bx-hide' : 'bx-show'}'></i>
                         </button>
                     </div>
                  </td>`;
         html += `</tr>`;
     });
-    
-    // Đưa HTML vào bảng có id="categoriesTable"
+
     const table = document.getElementById('categoriesTable');
-    if (table) {
-        table.innerHTML = html;
-    }
+    if (table) table.innerHTML = html;
 }
 
-// ============================================
-// BƯỚC 4: THÊM LOẠI SÁCH MỚI
-// ============================================
-
 function addCategory() {
-    // Bước 1: Nhập tên loại sách
     const name = prompt("Nhập tên loại sách:");
-    if (!name) return; // Nếu user nhấn Cancel hoặc để trống → thoát hàm
-    
-    // Bước 2: Nhập mô tả
-    const description = prompt("Nhập mô tả:");
-    if (!description) return;
-    const c = prompt("Nhập số lượng sách:");
-    if (!c) return;
-    
-    // Bước 3: Tạo ID tự động
-    // categories.length + 1: Lấy số thứ tự tiếp theo (VD: có 5 loại → thêm loại thứ 6)
-    // .padStart(3, '0'): Thêm số 0 vào trước để đủ 3 chữ số
-    // VD: 6 → "006" → "LS006"
-    const newId = "LS" + String(categories.length + 1).padStart(4, '0');
-    
-    // Bước 4: Thêm loại sách mới vào mảng
+    if (!name) return;
+    const newId = generateNewId();
     categories.push({
         id: newId,
-        name: name,
-        description: description,
-        status: "active",      // Mặc định là hiển thị
-        productCount: c        // Chưa có sản phẩm nào
+        name: name.trim(),
+        status: "active"
     });
-    
-    // ⭐⭐⭐ QUAN TRỌNG: LƯU DỮ LIỆU VÀO LOCALSTORAGE ⭐⭐⭐
-    // Nếu không có dòng này, khi refresh trang → dữ liệu mất
     saveCategories();
-    
-    // Hiển thị lại bảng với dữ liệu mới
     displayCategories();
     alert("✅ Đã thêm loại sách mới!");
 }
 
-// ============================================
-// BƯỚC 5: SỬA LOẠI SÁCH
-// ============================================
-
 function editCategory(index) {
-    const cat = categories[index]; // Lấy loại sách cần sửa theo vị trí index
+    const cat = categories[index];
+    if (!cat) return;
     
-    // Sửa tên loại sách
-    // prompt("Nhập tên mới:", cat.name): Hiển thị giá trị cũ trong ô nhập
+    const oldName = cat.name; // ✅ LƯU TÊN CŨ
     const newName = prompt("Nhập tên mới:", cat.name);
-    if (newName && newName !== cat.name) { // Kiểm tra có nhập và có thay đổi không
-        categories[index].name = newName; // Cập nhật tên mới
-    }
     
-    // Sửa mô tả
-    const newDesc = prompt("Nhập mô tả mới:", cat.description);
-    if (newDesc && newDesc !== cat.description) {
-        categories[index].description = newDesc;
+    if (newName && newName.trim() !== oldName) {
+        // ✅ ĐỒNG BỘ: Cập nhật tên loại sách trong tất cả sản phẩm
+        updateCategoryInProducts(oldName, newName.trim());
+        
+        categories[index].name = newName.trim();
+        saveCategories();
+        displayCategories();
+        alert("✅ Đã cập nhật loại sách!\n\n📦 Tất cả sản phẩm đã được đồng bộ.");
     }
-
-    const newSL = prompt("Nhập số lượng sách mới:", cat.productCount);
-    if (newSL && newSL !== cat.productCount) {
-        categories[index].productCount = newSL;
-    }
-    
-    // ⭐⭐⭐ LƯU LẠI SAU KHI SỬA ⭐⭐⭐
-    saveCategories();
-    
-    // Hiển thị lại bảng với dữ liệu đã cập nhật
-    displayCategories();
-    alert("✅ Đã cập nhật loại sách!");
 }
 
-// ============================================
-// BƯỚC 6: ẨN/HIỆN LOẠI SÁCH
-// ============================================
+// function toggleCategoryStatus(index) {
+//     const cat = categories[index];
+//     if (!cat) return;
+//     const action = cat.status === 'active' ? 'ẩn' : 'hiện';
+//     if (confirm(`Bạn có chắc muốn ${action} loại sách "${cat.name}"?`)) {
+//         categories[index].status = cat.status === 'active' ? 'hidden' : 'active';
+//         saveCategories();
+//         displayCategories();
+//     }
+// }
+/* ================================================= */
+/* ============ ẨN/HIỆN LOẠI SÁCH ================= */
+/* ================================================= */
 
 function toggleCategoryStatus(index) {
-    const cat = categories[index]; // Lấy loại sách theo index
+    const cat = categories[index];
+    if (!cat) return;
     
-    // Xác định hành động: ẩn hay hiện?
-    const action = cat.status === 'active' ? 'ẩn' : 'hiện';
+    const action = cat.status === 'active' ? 'ẨN' : 'HIỆN';
+    const productCount = countProductsUsingCategory(cat.name);
     
-    // Hiển thị popup xác nhận
-    if (confirm(`Bạn có chắc muốn ${action} loại sách "${cat.name}"?`)) {
-        // Đổi trạng thái: active ↔ hidden
-        // Nếu đang active → chuyển thành hidden
-        // Nếu đang hidden → chuyển thành active
-        categories[index].status = cat.status === 'active' ? 'hidden' : 'active';
+    let confirmMsg = `⚠️ Bạn có chắc muốn ${action} loại sách "${cat.name}"?`;
+    
+    if (productCount > 0) {
+        confirmMsg += `\n\n📦 Hiện có ${productCount} sản phẩm thuộc loại này!`;
+        confirmMsg += `\n✅ Các sản phẩm sẽ tự động ${action} theo`;
+    }
+    
+    if (confirm(confirmMsg)) {
+        const newStatus = cat.status === 'active' ? 'hidden' : 'active';
         
-        // ⭐⭐⭐ LƯU LẠI SAU KHI THAY ĐỔI TRẠNG THÁI ⭐⭐⭐
+        // ✅ 1. Cập nhật trạng thái loại sách
+        categories[index].status = newStatus;
         saveCategories();
+        console.log(`✅ Đã ${action} loại sách "${cat.name}"`);
         
-        // Hiển thị lại bảng
+        // ✅ 2. Cập nhật trạng thái SẢN PHẨM theo
+        if (productCount > 0) {
+            updateProductsStatusByCategory(cat.name, newStatus);
+        }
+        
         displayCategories();
+        
+        // Reload trang Quản lý Sản phẩm nếu đang mở
+        alert(`✅ Đã ${action} loại sách "${cat.name}"!\n\n${productCount > 0 ? `📦 ${productCount} sản phẩm đã ${action} theo\n\n🔄 Vui lòng REFRESH trang Quản lý Sản phẩm để xem thay đổi!` : ''}`);
+    }
+}
+function updateProductsStatusByCategory(categoryName, status) {
+    const products = JSON.parse(localStorage.getItem('bookstore_products') || '[]');
+    let count = 0;
+
+    products.forEach(product => {
+        if (product.category === categoryName) {
+            product.status = status;
+            count++;
+        }
+    });
+
+    if (count > 0) {
+        localStorage.setItem('bookstore_products', JSON.stringify(products));
+        console.log(`✅ Đã ${status === 'active' ? 'HIỆN' : 'ẨN'} ${count} sản phẩm thuộc loại "${categoryName}"`);
+    } else {
+        console.log(`⚠️ Không có sản phẩm nào thuộc loại "${categoryName}"`);
+    }
+}
+// function deleteCategory(index) {
+//     const cat = categories[index];
+//     if (!cat) return;
+    
+//     // ✅ KIỂM TRA: Có sản phẩm nào đang dùng loại này không?
+//     const productCount = countProductsUsingCategory(cat.name);
+    
+//     let confirmMsg = `⚠️ Bạn có chắc muốn XÓA loại sách "${cat.name}" (Mã: ${cat.id})?`;
+    
+//     if (productCount > 0) {
+//         confirmMsg += `\n\n📦 Hiện có ${productCount} sản phẩm đang dùng loại này!`;
+//         confirmMsg += `\n\n✅ Các sản phẩm sẽ được chuyển sang loại "Chưa phân loại"`;
+//     }
+    
+//     confirmMsg += `\n\n❌ Thao tác này không thể hoàn tác!`;
+    
+//     if (confirm(confirmMsg)) {
+//         // ✅ ĐỒNG BỘ: Xử lý sản phẩm trước khi xóa
+//         if (productCount > 0) {
+//             handleDeleteCategoryInProducts(cat.name);
+//         }
+        
+//         categories.splice(index, 1);
+//         saveCategories();
+//         displayCategories();
+        
+//         alert(`✅ Đã xóa loại sách "${cat.name}"!\n\n${productCount > 0 ? `📦 ${productCount} sản phẩm đã chuyển sang "Chưa phân loại"` : ''}`);
+//     }
+// }
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Đồng bộ lại categories từ books mỗi khi load trang
+    categories = initCategoriesFromBooks();
+    
+    if (document.getElementById('categoriesTable')) {
+        displayCategories();
+    }
+});
+/* ================================================= */
+/* ===== RESET DANH SÁCH LOẠI SÁCH VỀ MẶC ĐỊNH ===== */
+/* ================================================= */
+
+function resetCategories() {
+    if (!confirm('⚠️ BẠN CÓ CHẮC MUỐN ĐẶT LẠI DANH SÁCH LOẠI SÁCH?\n\nThao tác này sẽ:\n✅ Khôi phục đầy đủ 8 loại sách CHUẨN từ mảng books[]\n✅ XÓA các loại sách không thuộc danh sách chuẩn\n✅ Đặt tất cả về trạng thái "Hiển thị"\n\n❌ Các loại sách bạn tự thêm sẽ BỊ XÓA!')) {
+        return;
+    }
+    
+    // Danh sách loại sách CHUẨN từ mảng books[] (chỉ 8 loại)
+    const standardCategories = [
+        "Văn học", "Tâm lý", "Thiếu nhi", "Tản văn", 
+        "Học tập", "Kinh tế", "Kinh doanh", "Tiểu sử"
+    ];
+    
+    // Tạo lại danh sách MỚI - CHỈ GIỮ CÁC LOẠI CHUẨN
+    const resetCategories = standardCategories.map((name, index) => ({
+        id: "LS" + String(index + 1).padStart(3, '0'),
+        name: name,
+        status: "active"
+    }));
+    
+    // Sắp xếp theo tên (tùy chọn)
+    resetCategories.sort((a, b) => a.name.localeCompare(b.name, 'vi'));
+    
+    // Cập nhật lại ID sau khi sắp xếp
+    resetCategories.forEach((cat, index) => {
+        cat.id = "LS" + String(index + 1).padStart(3, '0');
+    });
+    
+    // Lưu vào localStorage
+    localStorage.setItem('categories', JSON.stringify(resetCategories));
+    categories = resetCategories;
+    
+    // Hiển thị lại bảng
+    displayCategories();
+    
+    alert('✅ Đã đặt lại danh sách loại sách!\n\n📚 Tổng số loại sách: ' + resetCategories.length + '\n\nCác loại: ' + resetCategories.map(c => c.name).join(', '));
+}
+/* ================================================= */
+/* ======= ĐỒNG BỘ VỚI QUẢN LÝ SẢN PHẨM ========== */
+/* ================================================= */
+
+// function updateCategoryInProducts(oldName, newName) {
+//     const products = JSON.parse(localStorage.getItem('bookstore_products') || '[]');
+//     let updated = false;
+
+//     products.forEach(product => {
+//         if (product.category === oldName) {
+//             product.category = newName;
+//             updated = true;
+//         }
+//     });
+
+//     if (updated) {
+//         localStorage.setItem('bookstore_products', JSON.stringify(products));
+//         console.log(`✅ Đã cập nhật loại sách "${oldName}" → "${newName}" trong sản phẩm`);
+//     }
+    
+//     // ✅ THÊM DÒNG NÀY - Đồng bộ với User
+//     updateCategoryInUserBooks(oldName, newName);
+// }
+function updateCategoryInProducts(oldName, newName) {
+    console.log(`  🔍 Đọc localStorage.bookstore_products...`);
+    const products = JSON.parse(localStorage.getItem('bookstore_products') || '[]');
+    console.log(`  📦 Tổng sản phẩm: ${products.length}`);
+    
+    let count = 0;
+
+    products.forEach((product, index) => {
+        // Debug: Hiển thị TỪNG sản phẩm
+        console.log(`    #${index}: "${product.name}" - category: "${product.category}"`);
+        
+        if (product.category === oldName) {
+            console.log(`      ✅ MATCH! Đổi "${oldName}" → "${newName}"`);
+            product.category = newName;
+            count++;
+        }
+    });
+
+    if (count > 0) {
+        localStorage.setItem('bookstore_products', JSON.stringify(products));
+        console.log(`  💾 Đã lưu ${count} sản phẩm vào localStorage`);
+        console.log(`  ✅ Hoàn tất! ${count} sản phẩm đã cập nhật`);
+    } else {
+        console.log(`  ⚠️ KHÔNG tìm thấy sản phẩm nào có category = "${oldName}"`);
+        console.log(`  💡 Gợi ý: Kiểm tra xem tên loại có chính xác không?`);
+    }
+    
+    return count; // ✅ TRẢ VỀ SỐ LƯỢNG CẬP NHẬT
+}
+// Kiểm tra loại sách có đang được sử dụng không
+function countProductsUsingCategory(categoryName) {
+    const products = JSON.parse(localStorage.getItem('bookstore_products') || '[]');
+    return products.filter(p => p.category === categoryName).length;
+}
+
+// // Xử lý xóa loại sách → Chuyển sản phẩm sang "Chưa phân loại"
+// function handleDeleteCategoryInProducts(categoryName) {
+//     const products = JSON.parse(localStorage.getItem('bookstore_products') || '[]');
+//     let updated = false;
+
+//     products.forEach(product => {
+//         if (product.category === categoryName) {
+//             product.category = "Chưa phân loại";
+//             updated = true;
+//         }
+//     });
+
+//     if (updated) {
+//         localStorage.setItem('bookstore_products', JSON.stringify(products));
+//         console.log(`✅ Đã chuyển sản phẩm của loại "${categoryName}" sang "Chưa phân loại"`);
+//     }
+    
+//     // ✅ THÊM DÒNG NÀY - Đồng bộ với User
+//     handleDeleteCategoryInUserBooks(categoryName);
+// }
+/* ================================================= */
+/* ======== ĐỒNG BỘ VỚI TRANG USER (books[]) ======= */
+/* ================================================= */
+
+// Cập nhật tên loại sách trong books[] của User
+function updateCategoryInUserBooks(oldName, newName) {
+    // Đọc books[] từ localStorage (nếu có)
+    const userBooks = JSON.parse(localStorage.getItem('books_user') || '[]');
+    let updated = false;
+
+    userBooks.forEach(book => {
+        if (book.category === oldName) {
+            book.category = newName;
+            updated = true;
+        }
+    });
+
+    if (updated) {
+        localStorage.setItem('books_user', JSON.stringify(userBooks));
+        console.log(`✅ Đã cập nhật loại sách "${oldName}" → "${newName}" trong books[] User`);
     }
 }
 
+// // Xử lý xóa loại sách trong books[] User
+// function handleDeleteCategoryInUserBooks(categoryName) {
+//     const userBooks = JSON.parse(localStorage.getItem('books_user') || '[]');
+//     let updated = false;
 
-// ============================================
-// BƯỚC 8: KHỞI TẠO KHI TRANG LOAD
-// ============================================
+//     userBooks.forEach(book => {
+//         if (book.category === categoryName) {
+//             book.category = "Chưa phân loại";
+//             updated = true;
+//         }
+//     });
 
-// DOMContentLoaded: Sự kiện kích hoạt khi HTML đã load xong
-document.addEventListener('DOMContentLoaded', function() {
-    // Kiểm tra xem có phần tử categoriesTable không (đang ở trang Quản lý Loại sách)
-    if (document.getElementById('categoriesTable')) {
-        displayCategories(); // Hiển thị dữ liệu từ localStorage
-    }
-});
+//     if (updated) {
+//         localStorage.setItem('books_user', JSON.stringify(userBooks));
+//         console.log(`✅ Đã chuyển sách của loại "${categoryName}" sang "Chưa phân loại" trong User`);
+//     }
+// }

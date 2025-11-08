@@ -356,3 +356,63 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+/* ================================================= */
+/* ===== KIỂM TRA TRẠNG THÁI TÀI KHOẢN REALTIME ===== */
+/* ================================================= */
+
+function checkAccountStatus() {
+  const currentUserStr = sessionStorage.getItem('currentUser');
+  if (!currentUserStr) return; // Chưa đăng nhập thì không kiểm tra
+  
+  try {
+    const loggedInUser = JSON.parse(currentUserStr);
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const latestUser = users.find(u => u.username === loggedInUser.username);
+    
+    // 1. Tài khoản bị xóa
+    if (!latestUser) {
+      alert('⚠️ Tài khoản không tồn tại. Vui lòng liên hệ Admin!');
+      sessionStorage.removeItem('currentUser');
+      window.location.href = 'dangki.html';
+      return;
+    }
+    
+    // 2. Tài khoản bị khóa
+    if (latestUser.status === 'locked') {
+      alert('🔒 Tài khoản của bạn đã bị khóa bởi Admin!\nBạn sẽ được đăng xuất.');
+      sessionStorage.removeItem('currentUser');
+      window.location.href = 'dangki.html';
+      return;
+    }
+    
+    // 3. Admin yêu cầu đổi mật khẩu
+    if (latestUser.requirePasswordChange === true) {
+      alert('⚠️ Admin yêu cầu bạn đổi mật khẩu.\nVui lòng đổi mật khẩu để tiếp tục!');
+      window.location.href = 'dangki.html';
+      return;
+    }
+    
+    // 4. Cập nhật thông tin mới nhất
+    sessionStorage.setItem('currentUser', JSON.stringify(latestUser));
+    
+    // 5. Đồng bộ currentUser global (nếu có thay đổi)
+    if (currentUser && currentUser.username === latestUser.username) {
+      currentUser = latestUser;
+      // Cập nhật lại giỏ hàng nếu có thay đổi từ tab khác
+      if (JSON.stringify(cart) !== JSON.stringify(latestUser.cart || [])) {
+        cart = latestUser.cart || [];
+        renderCart();
+      }
+    }
+    
+  } catch (error) {
+    console.error('❌ Lỗi kiểm tra trạng thái tài khoản:', error);
+  }
+}
+
+// Kiểm tra ngay khi load trang
+checkAccountStatus();
+
+// Kiểm tra mỗi 2 giây
+setInterval(checkAccountStatus, 2000);
