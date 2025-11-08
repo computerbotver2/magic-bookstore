@@ -201,7 +201,7 @@
       <p>Đăng nhập để quản lý cửa hàng</p>
     </div>
 
-    <div id="alertBox" class="alert"> <!--cái này để thông báo đăng nhập sai hay đúng-->
+    <div id="alertBox" class="alert">
       <i class='bx bx-error-circle'></i>
       <span id="alertMessage"></span>
     </div>
@@ -211,7 +211,7 @@
         <label>Tên đăng nhập</label>
         <div class="input-wrapper">
           <i class='bx bx-user'></i>
-          <input type="text" id="username" placeholder="Nhập tên đăng nhập" required>   <!--required: bắt phải nhập trc, nếu k sẽ báo Please fill out this field-->
+          <input type="text" id="username" placeholder="Nhập tên đăng nhập" required>
         </div>
       </div>
 
@@ -219,7 +219,7 @@
         <label>Mật khẩu</label>
         <div class="input-wrapper">
           <i class='bx bx-lock-alt'></i>
-          <input type="password" id="password" placeholder="Nhập mật khẩu" required> <!--type: password là để khi nhập nó sẽ hiện ● -->
+          <input type="password" id="password" placeholder="Nhập mật khẩu" required>
         </div>
       </div>
 
@@ -246,15 +246,10 @@
   </div>
 
   <script>
-    // ==================== ĐỌC TỪ HỆ THỐNG USER CHUNG ====================
-    function getUsers() {
-      return JSON.parse(localStorage.getItem('users') || '[]');
-    }
-  
     const loginForm = document.getElementById('loginForm');
     const alertBox = document.getElementById('alertBox');
     const alertMessage = document.getElementById('alertMessage');
-  
+
     // Hàm hiển thị thông báo
     function showAlert(message, type = 'error') {
       alertBox.classList.add('show');
@@ -266,8 +261,8 @@
         alertBox.classList.remove(type);
       }, 3000);
     }
-  
-    // ✅ ĐĂNG NHẬP ADMIN
+
+    // ✅ ĐĂNG NHẬP ADMIN - HARDCODE (KHÔNG ĐỌC TỪ LOCALSTORAGE)
     loginForm.addEventListener('submit', function(e) {
       e.preventDefault();
       
@@ -275,31 +270,27 @@
       const password = document.getElementById('password').value;
       const rememberMe = document.getElementById('rememberMe').checked;
       
-      // ✅ ĐỌC TỪ USERS[]
-      const users = getUsers();
-      const user = users.find(u => u.username === username && u.password === password);
-      
-      if (user && user.role === 'admin') {
-        // ✅ LÀ ADMIN
-        showAlert('Đăng nhập thành công!' , 'success');
+      // ✅ KIỂM TRA TRỰC TIẾP VỚI TÀI KHOẢN ADMIN
+      if (username === 'admin' && password === 'admin123') {
+        // ✅ ĐĂNG NHẬP THÀNH CÔNG
+        showAlert('Đăng nhập thành công!', 'success');
         
+        // Lưu trạng thái đăng nhập
         localStorage.setItem('adminLoggedIn', 'true');
         localStorage.setItem('adminInfo', JSON.stringify({
-          username: user.username,
-          name: user.name
+          username: 'admin',
+          name: 'Administrator'
         }));
         
         if (rememberMe) {
           localStorage.setItem('rememberMe', 'true');
         }
         
+        // Chuyển sang trang admin sau 1 giây
         setTimeout(() => {
           location.href = 'index.html';
         }, 1000);
         
-      } else if (user) {
-        // ✅ ĐĂNG NHẬP ĐÚNG NHƯNG KHÔNG PHẢI ADMIN
-        showAlert('❌ Tài khoản này không có quyền Admin!');
       } else {
         // ❌ SAI THÔNG TIN
         showAlert('Tên đăng nhập hoặc mật khẩu không đúng!');
