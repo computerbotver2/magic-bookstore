@@ -296,28 +296,29 @@ function getLatestImportPrice(productName) {
     return null; // Không tìm thấy → Dùng giá mặc định 100k
 }
 
-// ============================================
-// ✅ LƯU GIÁ BÁN VÀO BOOKSTORE_PRODUCTS
-// ============================================
 function savePricingToProducts() {
-    const products = JSON.parse(localStorage.getItem('bookstore_products') || '[]');
-    
+    let products = JSON.parse(localStorage.getItem('bookstore_products') || '[]');
+
+    // Nếu products rỗng, có thể load lại defaultProducts (nếu cần)
+    if (!products || products.length === 0) {
+        // Có thể cảnh báo hoặc tự động tạo mới, hoặc return không ghi đè!
+        console.warn('Không có sản phẩm nào trong localStorage, không cập nhật giá!');
+        // Hoặc: products = [...defaultProducts];
+        return;
+    }
+
     pricingData.forEach(item => {
         const product = products.find(p => p.id === item.id);
         if (product) {
             product.profitRate = item.profitRate;
             product.costPrice = item.costPrice;
-            
-            // ✅ TÍNH GIÁ BÁN
             const profit = (item.costPrice * item.profitRate) / 100;
-            product.price = Math.round(item.costPrice + profit); // Làm tròn
+            product.price = Math.round(item.costPrice + profit);
         }
     });
-    
+
     localStorage.setItem('bookstore_products', JSON.stringify(products));
     console.log('💾 Đã lưu giá bán vào bookstore_products');
-    
-    // ✅ TRIGGER SỰ KIỆN ĐỂ GIAO DIỆN USER CẬP NHẬT
     window.dispatchEvent(new Event('storage'));
 }
 
@@ -505,3 +506,27 @@ setInterval(() => {
         displayPricing();
     }
 }, 3000);
+window.addEventListener('storage', function(e) {
+    if (
+        e.key === 'bookstore_products' ||
+        e.key === 'categories'
+    ) {
+        // giaban.js
+        if (typeof loadProductsFromAdmin === 'function') {
+            pricingData = loadProductsFromAdmin();
+        }
+        if (typeof populateCategoryDropdown === 'function') {
+            populateCategoryDropdown();
+        }
+        if (typeof displayPricing === 'function') {
+            displayPricing();
+        }
+        // tonkho.js
+        if (typeof populateCategoryFilter === 'function') {
+            populateCategoryFilter();
+        }
+        if (typeof displayInventory === 'function') {
+            displayInventory();
+        }
+    }
+});

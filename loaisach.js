@@ -100,35 +100,113 @@ function displayCategories(filteredData = categories) {
 }
 
 function addCategory() {
-    const name = prompt("Nhập tên loại sách:");
-    if (!name) return;
+    const input = prompt("📚 Nhập tên loại sách mới:");
+    
+    if (input === null) return; // Hủy
+    
+    const name = input.trim().replace(/\s+/g, ' '); // Chuẩn hóa
+    
+    // ✅ KIỂM TRA RỖNG
+    if (!name) {
+        alert("❌ Tên loại sách không được để trống!");
+        return;
+    }
+    
+    // ✅ KIỂM TRA TRÙNG (không phân biệt hoa thường)
+    const isDuplicate = categories.some(cat => 
+        cat.name.trim().toLowerCase() === name.toLowerCase()
+    );
+    
+    if (isDuplicate) {
+        alert(`❌ Loại sách "${name}" đã tồn tại!\n\n💡 Vui lòng chọn tên khác.`);
+        return;
+    }
+    
+    // ✅ KIỂM TRA ĐỘ DÀI
+    if (name.length < 2) {
+        alert("❌ Tên loại sách phải có ít nhất 2 ký tự!");
+        return;
+    }
+    
+    if (name.length > 50) {
+        alert("❌ Tên loại sách không được vượt quá 50 ký tự!");
+        return;
+    }
+    
+    // Thêm mới
     const newId = generateNewId();
     categories.push({
         id: newId,
-        name: name.trim(),
+        name: name,
         status: "active"
     });
+    
     saveCategories();
     displayCategories();
-    alert("✅ Đã thêm loại sách mới!");
+    alert(`✅ Đã thêm loại sách mới!\n\n📋 Mã: ${newId}\n📚 Tên: ${name}`);
 }
 
 function editCategory(index) {
     const cat = categories[index];
     if (!cat) return;
     
-    const oldName = cat.name; // ✅ LƯU TÊN CŨ
-    const newName = prompt("Nhập tên mới:", cat.name);
+    const oldName = cat.name;
+    const input = prompt("✏️ Nhập tên mới:", oldName);
     
-    if (newName && newName.trim() !== oldName) {
-        // ✅ ĐỒNG BỘ: Cập nhật tên loại sách trong tất cả sản phẩm
-        updateCategoryInProducts(oldName, newName.trim());
-        
-        categories[index].name = newName.trim();
-        saveCategories();
-        displayCategories();
-        alert("✅ Đã cập nhật loại sách!\n\n📦 Tất cả sản phẩm đã được đồng bộ.");
+    if (input === null) return; // Hủy
+    
+    const newName = input.trim().replace(/\s+/g, ' '); // Chuẩn hóa
+    
+    // ✅ KIỂM TRA RỖNG
+    if (!newName) {
+        alert("❌ Tên loại sách không được để trống!");
+        return;
     }
+    
+    // Không đổi gì
+    if (newName === oldName) {
+        alert("ℹ️ Bạn chưa thay đổi tên loại sách.");
+        return;
+    }
+    
+    // ✅ KIỂM TRA TRÙNG (loại trừ chính nó)
+    const isDuplicate = categories.some((cat, idx) => 
+        idx !== index && cat.name.trim().toLowerCase() === newName.toLowerCase()
+    );
+    
+    if (isDuplicate) {
+        alert(`❌ Loại sách "${newName}" đã tồn tại!\n\n💡 Vui lòng chọn tên khác.`);
+        return;
+    }
+    
+    // ✅ KIỂM TRA ĐỘ DÀI
+    if (newName.length < 2) {
+        alert("❌ Tên loại sách phải có ít nhất 2 ký tự!");
+        return;
+    }
+    
+    if (newName.length > 50) {
+        alert("❌ Tên loại sách không được vượt quá 50 ký tự!");
+        return;
+    }
+    
+    // Xác nhận nếu có sản phẩm
+    const productCount = countProductsUsingCategory(oldName);
+    if (productCount > 0) {
+        const confirm = window.confirm(
+            `⚠️ Có ${productCount} sản phẩm đang dùng loại "${oldName}"\n\n` +
+            `Đổi thành "${newName}"?\n\n✅ Sản phẩm sẽ tự động cập nhật.`
+        );
+        if (!confirm) return;
+    }
+    
+    // Cập nhật
+    updateCategoryInProducts(oldName, newName);
+    categories[index].name = newName;
+    saveCategories();
+    displayCategories();
+    
+    alert(`✅ Đã cập nhật!\n\n📚 ${newName}\n${productCount > 0 ? `📦 ${productCount} sản phẩm đã đồng bộ` : ''}`);
 }
 
 // function toggleCategoryStatus(index) {

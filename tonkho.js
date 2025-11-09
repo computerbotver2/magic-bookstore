@@ -443,5 +443,98 @@ document.addEventListener('DOMContentLoaded', function() {
             categoryFromDate.value = today;
             categoryToDate.value = today;
         }
+        
+        // ✅ CHỈ HIỆN CẢNH BÁO KHI TRANG TỒN KHO ĐANG ACTIVE
+        setTimeout(() => {
+            const inventoryPage = document.getElementById('inventory');
+            if (inventoryPage && inventoryPage.classList.contains('active')) {
+                showStockWarning();
+            }
+        }, 500); // Delay 0.5s để đảm bảo trang đã load xong
+    }
+});
+
+// ============================================
+// ✅ HÀM HIỂN THỊ CẢNH BÁO TỒN KHO
+// ============================================
+
+function showStockWarning() {
+    const stockData = JSON.parse(localStorage.getItem('bookstore_stock') || '{}');
+    const products = getProductsFromAdmin();
+    
+    let outOfStockList = [];
+    let lowStockList = [];
+    
+    products.forEach(product => {
+        const bookId = parseInt(product.id.replace('SP', '').replace(/^0+/, '')) || 0;
+        const qty = stockData[bookId] || 0;
+        
+        if (qty === 0) {
+            outOfStockList.push(product.name);
+        } else if (qty <= 5) {
+            lowStockList.push(`${product.name} (còn ${qty})`);
+        }
+    });
+    
+    // ✅ TẠO THÔNG BÁO
+    let message = '📊 TÌNH TRẠNG TỒN KHO\n\n';
+    
+    if (outOfStockList.length === 0 && lowStockList.length === 0) {
+        message += '✅ Tất cả sản phẩm đều còn hàng đầy đủ!';
+        alert(message);
+        return;
+    }
+    
+    if (outOfStockList.length > 0) {
+        message += `❌ HẾT HÀNG (${outOfStockList.length} sản phẩm):\n`;
+        outOfStockList.forEach((name, index) => {
+            if (index < 5) { // Chỉ hiển thị 5 sản phẩm đầu
+                message += `   • ${name}\n`;
+            }
+        });
+        if (outOfStockList.length > 5) {
+            message += `   ... và ${outOfStockList.length - 5} sản phẩm khác\n`;
+        }
+        message += '\n';
+    }
+    
+    if (lowStockList.length > 0) {
+        message += `⚠️ SẮP HẾT HÀNG (${lowStockList.length} sản phẩm):\n`;
+        lowStockList.forEach((name, index) => {
+            if (index < 5) { // Chỉ hiển thị 5 sản phẩm đầu
+                message += `   • ${name}\n`;
+            }
+        });
+        if (lowStockList.length > 5) {
+            message += `   ... và ${lowStockList.length - 5} sản phẩm khác\n`;
+        }
+    }
+    
+    message += '\n💡 Vui lòng nhập hàng kịp thời!';
+    
+    alert(message);
+}
+window.addEventListener('storage', function(e) {
+    if (
+        e.key === 'bookstore_products' ||
+        e.key === 'categories'
+    ) {
+        // giaban.js
+        if (typeof loadProductsFromAdmin === 'function') {
+            pricingData = loadProductsFromAdmin();
+        }
+        if (typeof populateCategoryDropdown === 'function') {
+            populateCategoryDropdown();
+        }
+        if (typeof displayPricing === 'function') {
+            displayPricing();
+        }
+        // tonkho.js
+        if (typeof populateCategoryFilter === 'function') {
+            populateCategoryFilter();
+        }
+        if (typeof displayInventory === 'function') {
+            displayInventory();
+        }
     }
 });

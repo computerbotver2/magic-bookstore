@@ -88,88 +88,79 @@ const books = [
 /* ================================================= */
 
 function getBooksFromAdmin() {
-    console.log('📚 Đang đọc sách từ Admin...');
-    const stored = localStorage.getItem('bookstore_products');
-    
-    if (!stored) {
-        console.log('⚠️ Chưa có sản phẩm từ Admin, dùng 27 sách mặc định');
-        return books;
-    }
-    
-    try {
-        const adminProducts = JSON.parse(stored);
-        console.log(`📦 Admin có ${adminProducts.length} sản phẩm`);
-        
-        // ✅ Lấy danh sách tên sản phẩm đã ẨN
-        const hiddenNames = adminProducts
-            .filter(p => p.status === 'hidden')
-            .map(p => p.name.toLowerCase());
-        
-        console.log(`🔒 Có ${hiddenNames.length} sản phẩm đã ẩn:`, hiddenNames);
-        
-        // ✅ Chuyển đổi sản phẩm Admin ACTIVE
-        const convertedBooks = adminProducts
-            .filter(product => product.status === 'active')
-            .map(product => {
-                const defaultBook = books.find(b => 
-                    b.title.toLowerCase() === product.name.toLowerCase()
-                );
-                
-                // ✅ Nếu trùng với sách mặc định → Dùng ID gốc
-                // ✅ Nếu là sách mới → Tạo ID mới từ product.id Admin
-                let bookId;
-                if (defaultBook) {
-                    bookId = defaultBook.id;
-                } else {
-                    // Lấy số từ "SP001" → 1, "SP002" → 2
-                    const match = product.id.match(/\d+/);
-                    bookId = match ? parseInt(match[0]) : 1000;
-                }
-                
-                return {
-                  id: bookId,
-                  title: product.name || 'Chưa đặt tên',
-                  author: defaultBook?.author || 'Đang cập nhật',
-                  category: product.category || 'Chưa phân loại',
-                  publisher: defaultBook?.publisher || 'Đang cập nhật',
-                  price: product.price || 110000,  // ← ĐỌC GIÁ TỪ ADMIN (đã có từ giaban.js)
-                  img: product.image || 'https://via.placeholder.com/300x400?text=No+Image',
-                  desc: product.description || 'Chưa có mô tả'
-                };
-            });
-        
-        console.log(`✅ Đã chuyển đổi ${convertedBooks.length} sản phẩm ACTIVE từ Admin`);
-        
-        // ✅ Kết hợp với sách mặc định, NHƯNG loại bỏ sách đã ẨN
-        const allBooks = [...convertedBooks];
-        
-        books.forEach(defaultBook => {
-            const titleLower = defaultBook.title.toLowerCase();
-            
-            // ⚠️ BỎ QUA nếu sách mặc định đã bị ẨN trong Admin
-            if (hiddenNames.includes(titleLower)) {
-                console.log(`⏭️ Bỏ qua sách mặc định đã ẨN: ${defaultBook.title}`);
-                return;
-            }
-            
-            // Kiểm tra xem đã có trong danh sách chưa
-            const exists = allBooks.find(b => 
-                b.title.toLowerCase() === titleLower
-            );
-            
-            if (!exists) {
-                allBooks.push(defaultBook);
-            }
-        });
-        
-        console.log(`📚 Tổng cộng: ${allBooks.length} sách`);
-        console.log('📋 Book IDs:', allBooks.slice(0, 5).map(b => `${b.title.substring(0, 20)}: ID=${b.id} (${typeof b.id})`));
-        return allBooks;
-        
-    } catch (e) {
-        console.error('❌ Lỗi đọc sản phẩm từ Admin:', e);
-        return books;
-    }
+  console.log('📚 Đang đọc sách từ Admin...');
+  const stored = localStorage.getItem('bookstore_products');
+  
+  if (!stored) {
+      console.log('⚠️ Chưa có sản phẩm từ Admin, dùng 27 sách mặc định');
+      return books;
+  }
+  
+  try {
+      const adminProducts = JSON.parse(stored);
+      console.log(`📦 Admin có ${adminProducts.length} sản phẩm`);
+      
+      const hiddenNames = adminProducts
+          .filter(p => p.status === 'hidden')
+          .map(p => p.name.toLowerCase());
+      
+      console.log(`🔒 Có ${hiddenNames.length} sản phẩm đã ẩn:`, hiddenNames);
+      
+      const convertedBooks = adminProducts
+          .filter(product => product.status === 'active')
+          .map(product => {
+              const defaultBook = books.find(b => 
+                  b.title.toLowerCase() === product.name.toLowerCase()
+              );
+              
+              let bookId;
+              if (defaultBook) {
+                  bookId = defaultBook.id;
+              } else {
+                  const match = product.id.match(/\d+/);
+                  bookId = match ? parseInt(match[0]) : 1000;
+              }
+              
+              return {
+                id: bookId,
+                title: product.name || 'Chưa đặt tên',
+                author: product.author || defaultBook?.author || 'Đang cập nhật',  // ✅ SỬA
+                category: product.category || 'Chưa phân loại',
+                publisher: product.publisher || defaultBook?.publisher || 'Đang cập nhật',  // ✅ SỬA
+                price: product.price || 110000,
+                img: product.image || 'https://via.placeholder.com/300x400?text=No+Image',
+                desc: product.description || 'Chưa có mô tả'
+              };
+          });
+      
+      console.log(`✅ Đã chuyển đổi ${convertedBooks.length} sản phẩm ACTIVE từ Admin`);
+      
+      const allBooks = [...convertedBooks];
+      
+      books.forEach(defaultBook => {
+          const titleLower = defaultBook.title.toLowerCase();
+          
+          if (hiddenNames.includes(titleLower)) {
+              console.log(`⏭️ Bỏ qua sách mặc định đã ẨN: ${defaultBook.title}`);
+              return;
+          }
+          
+          const exists = allBooks.find(b => 
+              b.title.toLowerCase() === titleLower
+          );
+          
+          if (!exists) {
+              allBooks.push(defaultBook);
+          }
+      });
+      
+      console.log(`📚 Tổng cộng: ${allBooks.length} sách`);
+      return allBooks;
+      
+  } catch (e) {
+      console.error('❌ Lỗi đọc sản phẩm từ Admin:', e);
+      return books;
+  }
 }
 /* ================================================= */
 /* ==== ĐỌC LOẠI SÁCH TỪ LOCALSTORAGE (ADMIN) ==== */
@@ -290,15 +281,19 @@ function renderGrid(page=1){
     title.className = 'title';
     title.textContent = b.title;
     title.onclick = () => openModal(b); 
-    
+    //////backup_products.txt
     const author = document.createElement('div');
     author.className = 'author';
     author.style.marginBottom = '4px';
-    author.textContent = b.author;
+    author.style.fontSize = '13px';
+    author.style.color = '#666';
+    author.textContent = b.author || 'Tác giả chưa rõ';  // ✅ THÊM FALLBACK
     
     const publisher = document.createElement('div');
     publisher.className = 'muted-small';
-    publisher.textContent = `NXB: ${b.publisher}`;
+    publisher.style.fontSize = '12px';
+    publisher.style.color = '#999';
+    publisher.textContent = `NXB: ${b.publisher || 'Đang cập nhật'}`;  // ✅ THÊM FALLBACK
     // ✅ HIỂN THỊ TỒN KHO TRONG CARD
     const stockDiv = document.createElement('div');
     stockDiv.className = 'muted-small';

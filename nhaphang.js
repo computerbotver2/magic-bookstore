@@ -267,6 +267,10 @@ function editImport(index) {
 // HOÀN THÀNH PHIẾU NHẬP - CẬP NHẬT TỒN KHO
 // ============================================
 
+// ============================================
+// HOÀN THÀNH PHIẾU NHẬP - CẬP NHẬT TỒN KHO (✅ HỖ TRỢ SẢN PHẨM MỚI)
+// ============================================
+
 function completeImport(index) {
     if (confirm("✅ Xác nhận hoàn thành phiếu nhập?\nSau khi hoàn thành sẽ KHÔNG THỂ SỬA!")) {
         const order = importOrders[index];
@@ -309,8 +313,10 @@ function completeImport(index) {
         order.products.forEach(product => {
             let bookId = null;
             let bookCategory = null;
+            let productCode = null;
             const bookName = product.name.toLowerCase().trim();
             
+            // ✅ 1️⃣ TÌM TRONG defaultBooks (27 cuốn cố định)
             const defaultBook = defaultBooks.find(b => 
                 b.title.toLowerCase().trim() === bookName
             );
@@ -318,54 +324,60 @@ function completeImport(index) {
             if (defaultBook) {
                 bookId = defaultBook.id;
                 bookCategory = defaultBook.category;
+                productCode = "SP" + String(bookId).padStart(3, '0');
+                console.log(`📚 Tìm thấy trong 27 cuốn: ${product.name} → ${productCode}`);
             } else {
+                // ✅ 2️⃣ TÌM TRONG adminProducts (sản phẩm do admin thêm)
                 const adminProduct = adminProducts.find(p => 
                     p.name.toLowerCase().trim() === bookName && p.status === 'active'
                 );
+                
                 if (adminProduct) {
-                    bookId = adminProduct.id;
+                    // ✅ SẢN PHẨM MỚI → LẤY ID TỪ ADMIN
+                    productCode = adminProduct.id; // VD: "SP028", "SP999"
+                    bookId = parseInt(productCode.replace('SP', '').replace(/^0+/, '')) || 999;
                     bookCategory = adminProduct.category;
+                    
+                    console.log(`🆕 Tìm thấy sản phẩm mới: ${product.name} → ${productCode} (ID: ${bookId})`);
+                } else {
+                    // ❌ KHÔNG TÌM THẤY TRONG CẢ 2 → BỎ QUA
+                    console.warn(`⚠️ Không tìm thấy sản phẩm: ${product.name}`);
+                    alert(`⚠️ Không tìm thấy sản phẩm "${product.name}" trong hệ thống!\n\nVui lòng thêm sản phẩm này vào "Quản lý Sản phẩm" trước.`);
+                    return; // Skip sản phẩm này
                 }
             }
             
-            if (bookId) {
-                // ✅ TẠO productCode TRƯỚC
-                const productCode = "SP" + String(bookId).padStart(3, '0');
+            // ✅ 3️⃣ CẬP NHẬT TỒN KHO
+            const stockData = JSON.parse(localStorage.getItem('bookstore_stock') || '{}');
+            stockData[bookId] = (stockData[bookId] || 0) + product.quantity;
+            localStorage.setItem('bookstore_stock', JSON.stringify(stockData));
+            
+            // ✅ 4️⃣ CẬP NHẬT GIÁ VỐN VÀO BOOKSTORE_PRODUCTS
+            const products = JSON.parse(localStorage.getItem('bookstore_products') || '[]');
+            const productInAdmin = products.find(p => p.id === productCode);
+            if (productInAdmin) {
+                productInAdmin.costPrice = product.importPrice;
                 
-                // 1️⃣ CẬP NHẬT TỒN KHO (bookstore_stock)
-                const stockData = JSON.parse(localStorage.getItem('bookstore_stock') || '{}');
-                stockData[bookId] = (stockData[bookId] || 0) + product.quantity;
-                localStorage.setItem('bookstore_stock', JSON.stringify(stockData));
+                // Tính lại giá bán
+                const profitRate = productInAdmin.profitRate || 10;
+                const profit = (product.importPrice * profitRate) / 100;
+                productInAdmin.price = Math.round(product.importPrice + profit);
                 
-                // 2️⃣ CẬP NHẬT GIÁ VỐN VÀO BOOKSTORE_PRODUCTS
-                const products = JSON.parse(localStorage.getItem('bookstore_products') || '[]');
-                const productInAdmin = products.find(p => p.id === productCode);
-                if (productInAdmin) {
-                    productInAdmin.costPrice = product.importPrice;
-                    
-                    // ✅ TÍNH LẠI GIÁ BÁN
-                    const profitRate = productInAdmin.profitRate || 10;
-                    const profit = (product.importPrice * profitRate) / 100;
-                    productInAdmin.price = Math.round(product.importPrice + profit);
-                    
-                    console.log(`💰 Cập nhật giá vốn ${product.name}: ${product.importPrice.toLocaleString()}₫ → Giá bán: ${productInAdmin.price.toLocaleString()}₫`);
-                }
-                localStorage.setItem('bookstore_products', JSON.stringify(products));
-                
-                // 3️⃣ GHI LOG VÀO INVENTORY
-                inventory.push({
-                    id: productCode,
-                    name: product.name,
-                    category: bookCategory,
-                    date: order.date,
-                    type: "Nhập",
-                    quantity: product.quantity
-                });
-                
-                console.log(`✅ Cộng tồn kho: ${product.name} (ID: ${bookId}) +${product.quantity} → Tổng: ${stockData[bookId]}`);
-            } else {
-                console.warn(`⚠️ Không tìm thấy ID cho sản phẩm: ${product.name}`);
+                console.log(`💰 Cập nhật giá vốn ${product.name}: ${product.importPrice.toLocaleString()}₫ → Giá bán: ${productInAdmin.price.toLocaleString()}₫`);
             }
+            localStorage.setItem('bookstore_products', JSON.stringify(products));
+            
+            // ✅ 5️⃣ GHI LOG VÀO INVENTORY
+            inventory.push({
+                id: productCode,
+                name: product.name,
+                category: bookCategory,
+                date: order.date,
+                type: "Nhập",
+                quantity: product.quantity
+            });
+            
+            console.log(`✅ Cộng tồn kho: ${product.name} (${productCode}, ID: ${bookId}) +${product.quantity} → Tổng: ${stockData[bookId]}`);
         });
         
         // ✅ LƯU INVENTORY

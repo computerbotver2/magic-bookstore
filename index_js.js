@@ -25,12 +25,20 @@ function openPage(pageId) {
         page.classList.remove('active');
     });
     
-    // Show selected page, truyền vào id nhưng thêm vào class
+    // Show selected page
     document.getElementById(pageId).classList.add('active');
     
     // Hide menu
     document.body.classList.add('page-active');
     
+    // ✅ NẾU MỞ TRANG TỒN KHO → HIỂN THỊ CẢNH BÁO
+    if (pageId === 'inventory') {
+        setTimeout(() => {
+            if (typeof showStockWarning === 'function') {
+                showStockWarning();
+            }
+        }, 300);
+    }
 }
 
 // Back to menu

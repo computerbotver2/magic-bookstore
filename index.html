@@ -181,6 +181,8 @@
                             <th>Mã SP</th>
                             <th>Hình</th>
                             <th>Tên sản phẩm</th>
+                            <th>Tác giả</th> <!-- ✅ THÊM -->
+                            <th>Nhà xuất bản</th> <!-- ✅ THÊM -->
                             <th>Loại</th>
                             <th>Mô tả</th>
                             <th>Trạng thái</th>
@@ -224,6 +226,19 @@
                             <label>Tên sản phẩm: *</label>
                             <input type="text" id="newProductName" placeholder="Nhập tên sản phẩm" required>
                         </div>
+
+                                            <!-- ✅ TÁC GIẢ -->
+                       <!-- ✅ TÁC GIẢ -->
+<div class="form-group">
+    <label>Tác giả: *</label>
+    <input type="text" id="newProductAuthor" placeholder="Nhập tên tác giả" required>
+</div>
+
+<!-- ✅ NHÀ XUẤT BẢN -->
+<div class="form-group">
+    <label>Nhà xuất bản: *</label>
+    <input type="text" id="newProductPublisher" placeholder="Nhập tên nhà xuất bản" required>
+</div>
 
                         <div class="form-group">
                             <label>Địa chỉ liên kết hình ảnh (URL): *</label>
@@ -287,6 +302,17 @@
                             <input type="text" id="editProductName" placeholder="Nhập tên sản phẩm" required>
                         </div>
 
+                       <!-- ✅ TÁC GIẢ -->
+<div class="form-group">
+    <label>Tác giả: *</label>
+    <input type="text" id="editProductAuthor" placeholder="Nhập tên tác giả" required>
+</div>
+
+<!-- ✅ NHÀ XUẤT BẢN -->
+<div class="form-group">
+    <label>Nhà xuất bản: *</label>
+    <input type="text" id="editProductPublisher" placeholder="Nhập tên nhà xuất bản" required>
+</div>
                         <div class="form-group">
                             <label>Địa chỉ liên kết hình ảnh (URL): *</label>
                             <input type="url" id="editProductImage" placeholder="https://example.com/image.jpg" required>

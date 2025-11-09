@@ -161,84 +161,95 @@ function processOrder(orderId) {
 }
 
 function shipOrder(orderId) {
-    if (confirm('📦 Xác nhận đã GIAO HÀNG?')) {
-        // 1️⃣ TÌM ĐƠN HÀNG
-        const order = orders.find(o => o.id === orderId);
-        
-        if (order && order.items && order.items.length > 0) {
-            // 2️⃣ CẬP NHẬT TỒN KHO VÀ GHI LOG XUẤT
-            const stockData = JSON.parse(localStorage.getItem('bookstore_stock') || '{}');
-            const inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
-            
-            const defaultBooks = [
-                {id:1, title:"Tôi thấy hoa vàng trên cỏ xanh", category:"Văn học"},
-                {id:2, title:"Đắc nhân tâm", category:"Tâm lý"},
-                {id:3, title:"Nhà giả kim", category:"Văn học"},
-                {id:4, title:"Cho tôi xin một vé đi tuổi thơ", category:"Thiếu nhi"},
-                {id:5, title:"Dế mèn phiêu lưu ký", category:"Thiếu nhi"},
-                {id:6, title:"Tuổi thơ dữ dội", category:"Văn học"},
-                {id:7, title:"Số đỏ", category:"Văn học"},
-                {id:8, title:"Nỗi buồn chiến tranh", category:"Văn học"},
-                {id:9, title:"Tư duy nhanh và chậm", category:"Tâm lý"},
-                {id:10, title:"Tuổi trẻ đáng giá bao nhiêu", category:"Tản văn"},
-                {id:11, title:"Khởi nghiệp 4.0", category:"Kinh tế"},
-                {id:12, title:"Hãy sống ở thể chủ động", category:"Tâm lý"},
-                {id:13, title:"Làm đĩ", category:"Văn học"},
-                {id:14, title:"Tôi tài giỏi, bạn cũng thế!", category:"Học tập"},
-                {id:15, title:"Kể chuyện trước giờ đi ngủ", category:"Thiếu nhi"},
-                {id:16, title:"Bộ não và tâm trí", category:"Tâm lý"},
-                {id:17, title:"Bạn đắt giá bao nhiêu?", category:"Tản văn"},
-                {id:18, title:"Một đời như kẻ tìm đường", category:"Tiểu sử"},
-                {id:19, title:"3 người thầy vĩ đại", category:"Tâm lý"},
-                {id:20, title:"Những tù nhân của địa lý", category:"Học tập"},
-                {id:21, title:"Tinh hoa trí tuệ do thái", category:"Kinh doanh"},
-                {id:22, title:"Nghĩ giàu và làm giàu", category:"Kinh doanh"},
-                {id:23, title:"Hiểu về trái tim", category:"Tâm lý"},
-                {id:24, title:"Đừng bao giờ đi ăn một mình", category:"Tâm lý"},
-                {id:25, title:"Đọc vị bất kì ai", category:"Tâm lý"},
-                {id:26, title:"Ra bờ suối ngắm hoa kèn hồng", category:"Văn học"},
-                {id:27, title:"Con chim xanh biếc quay về", category:"Tản văn"}
-            ];
-            
-            order.items.forEach(item => {
-                const bookId = item.id;
-                const quantity = item.quantity;
-                const bookName = item.title;
-                
-                // ✅ TRỪ TỒN KHO
-                stockData[bookId] = (stockData[bookId] || 0) - quantity;
-                
-                // ✅ TÌM CATEGORY
-                const defaultBook = defaultBooks.find(b => b.id === bookId);
-                const category = defaultBook ? defaultBook.category : 'Chưa rõ';
-                
-                // ✅ GHI LOG XUẤT VÀO INVENTORY
-                const productCode = "SP" + String(bookId).padStart(3, '0');
-                inventory.push({
-                    id: productCode,
-                    name: bookName,
-                    category: category,
-                    date: new Date().toISOString().split('T')[0],
-                    type: "Xuất",
-                    quantity: quantity
-                });
-                
-                console.log(`📤 Xuất kho: ${bookName} -${quantity} → Tồn: ${stockData[bookId]}`);
-            });
-            
-            // 3️⃣ LƯU DỮ LIỆU
-            localStorage.setItem('bookstore_stock', JSON.stringify(stockData));
-            localStorage.setItem('inventory', JSON.stringify(inventory));
-        }
-        
-        // 4️⃣ CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG
-        saveOrderStatus(orderId, 'shipped');
-        orders = loadOrdersFromUsers();
-        displayOrders();
-        alert('✅ Đã chuyển đơn sang trạng thái "Đã giao"\n📦 Đã cập nhật tồn kho!\n\n👉 User sẽ thấy nút "Đã nhận hàng"');
-    }
-}
+    if (!confirm('📦 Xác nhận đã GIAO HÀNG cho đơn này?')) return;
 
+    // 1️⃣ Tìm đơn hàng theo mã
+    const order = orders.find(o => o.id === orderId);
+    if (!order || !order.items || order.items.length === 0) return;
+
+    // 2️⃣ Cập nhật tồn kho và ghi log xuất
+    const stockData = JSON.parse(localStorage.getItem('bookstore_stock') || '{}');
+    const inventory = JSON.parse(localStorage.getItem('inventory') || '[]');
+    const adminProducts = JSON.parse(localStorage.getItem('bookstore_products') || '[]');
+
+    // Sách mặc định cho fallback (danh mục, không cần sửa nếu đã có đủ loại)
+    const defaultBooks = [
+        {id:1, title:"Tôi thấy hoa vàng trên cỏ xanh", category:"Văn học"},
+        {id:2, title:"Đắc nhân tâm", category:"Tâm lý"},
+        {id:3, title:"Nhà giả kim", category:"Văn học"},
+        {id:4, title:"Cho tôi xin một vé đi tuổi thơ", category:"Thiếu nhi"},
+        {id:5, title:"Dế mèn phiêu lưu ký", category:"Thiếu nhi"},
+        {id:6, title:"Tuổi thơ dữ dội", category:"Văn học"},
+        {id:7, title:"Số đỏ", category:"Văn học"},
+        {id:8, title:"Nỗi buồn chiến tranh", category:"Văn học"},
+        {id:9, title:"Tư duy nhanh và chậm", category:"Tâm lý"},
+        {id:10, title:"Tuổi trẻ đáng giá bao nhiêu", category:"Tản văn"},
+        {id:11, title:"Khởi nghiệp 4.0", category:"Kinh tế"},
+        {id:12, title:"Hãy sống ở thể chủ động", category:"Tâm lý"},
+        {id:13, title:"Làm đĩ", category:"Văn học"},
+        {id:14, title:"Tôi tài giỏi, bạn cũng thế!", category:"Học tập"},
+        {id:15, title:"Kể chuyện trước giờ đi ngủ", category:"Thiếu nhi"},
+        {id:16, title:"Bộ não và tâm trí", category:"Tâm lý"},
+        {id:17, title:"Bạn đắt giá bao nhiêu?", category:"Tản văn"},
+        {id:18, title:"Một đời như kẻ tìm đường", category:"Tiểu sử"},
+        {id:19, title:"3 người thầy vĩ đại", category:"Tâm lý"},
+        {id:20, title:"Những tù nhân của địa lý", category:"Học tập"},
+        {id:21, title:"Tinh hoa trí tuệ do thái", category:"Kinh doanh"},
+        {id:22, title:"Nghĩ giàu và làm giàu", category:"Kinh doanh"},
+        {id:23, title:"Hiểu về trái tim", category:"Tâm lý"},
+        {id:24, title:"Đừng bao giờ đi ăn một mình", category:"Tâm lý"},
+        {id:25, title:"Đọc vị bất kì ai", category:"Tâm lý"},
+        {id:26, title:"Ra bờ suối ngắm hoa kèn hồng", category:"Văn học"},
+        {id:27, title:"Con chim xanh biếc quay về", category:"Tản văn"}
+    ];
+
+    // Duyệt từng sản phẩm trong đơn
+    order.items.forEach(item => {
+        const bookId = item.id;
+        const productCode = "SP" + String(bookId).padStart(3, '0');
+        const bookName = item.title;
+        const quantity = item.quantity;
+
+        // 1️⃣ Lấy loại sách từ adminProducts nếu có, nếu không thì lấy theo defaultBooks
+        let category = "Chưa rõ";
+        const adminProduct = adminProducts.find(p => p.id === productCode);
+        if (adminProduct) {
+            category = adminProduct.category;
+        } else {
+            const defaultBook = defaultBooks.find(b => b.id === bookId);
+            if (defaultBook) category = defaultBook.category;
+        }
+
+        // 2️⃣ Trừ tồn kho
+        stockData[bookId] = (stockData[bookId] || 0) - quantity;
+
+        // 3️⃣ Ghi log xuất kho vào inventory
+        inventory.push({
+            id: productCode,
+            name: bookName,
+            category: category,
+            date: new Date().toISOString().split('T')[0],
+            type: "Xuất",
+            quantity: quantity
+        });
+
+        console.log(`📤 Xuất kho: ${bookName} -${quantity} (${category}) -> Tồn sau: ${stockData[bookId]}`);
+    });
+
+    // 4️⃣ Lưu dữ liệu
+    localStorage.setItem('bookstore_stock', JSON.stringify(stockData));
+    localStorage.setItem('inventory', JSON.stringify(inventory));
+
+    // 5️⃣ Đổi trạng thái đơn hàng thành "Đã giao"
+    saveOrderStatus(orderId, 'shipped');
+
+    // 6️⃣ Refresh hiển thị đơn trên giao diện admin
+    orders = loadOrdersFromUsers();
+    displayOrders();
+
+    // 7️⃣ Thông báo hành động đã hoàn tất
+    alert('✅ Đã chuyển đơn sang trạng thái "Đã giao"\n📦 Đã cập nhật tồn kho!\n\n👉 User sẽ thấy nút "Đã nhận hàng"');
+}
 function cancelOrderByAdmin(orderId) {
     if (confirm('❌ Bạn có chắc muốn HỦY đơn hàng này?\n\n⚠️ User sẽ nhận được thông báo!')) {
         saveOrderStatus(orderId, 'cancelled', 'admin');
