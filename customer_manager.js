@@ -2,7 +2,7 @@ let customers = [];
 
 // ==================== MIGRATION TỰ ĐỘNG ====================
 function migrateOldUsers() {
-    const saved = localStorage.getItem('users');
+    const saved = localStorage.getItem('users'); 
     if (!saved) return;
     
     let users = JSON.parse(saved);
@@ -15,7 +15,7 @@ function migrateOldUsers() {
             let maxNum = 0;
             users.forEach(u => {
                 if (u.id && u.id.startsWith('KH')) {
-                    const num = parseInt(u.id.substring(2));
+                    const num = parseInt(u.id.substring(2));  //từ chuỗi sang số int
                     if (num > maxNum) maxNum = num;
                 }
             });
@@ -162,8 +162,8 @@ function resetMatKhau(i){
     
     if(hoi){
         customers[i].requirePasswordChange = true;
-        saveCustomersToLocalStorage();
-        hienthiCustomer();
+        saveCustomersToLocalStorage(); //lưu vào localstorage những gì đã chỉnh sửa
+        hienthiCustomer();             //có thể thay bằng refresh để câp nhật giao diện
         alert("✅ Đã gửi yêu cầu đổi mật khẩu!");
     }
 }

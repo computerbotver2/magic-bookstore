@@ -20,8 +20,19 @@ const importStatusClass = {
 
 function saveImportOrders() {
     localStorage.setItem('importOrders', JSON.stringify(importOrders));
-}
+}  
 
+// KIỂM TRA LOG TỒN KHO ĐÃ TỒN TẠI CHƯA
+function isInventoryEntryExist(arr, log) {
+    return arr.some(item =>
+        item.id === log.id &&
+        item.date === log.date &&
+        item.type === log.type &&
+        item.quantity === log.quantity &&
+        item.name === log.name &&
+        (item.orderId ? item.orderId === log.orderId : true)
+    );
+}
 // ============================================
 // HIỂN THỊ DANH SÁCH
 // ============================================
@@ -263,9 +274,6 @@ function editImport(index) {
     displayImportOrders();
     alert("✅ Đã cập nhật phiếu nhập và giá vốn!");
 }
-// ============================================
-// HOÀN THÀNH PHIẾU NHẬP - CẬP NHẬT TỒN KHO
-// ============================================
 
 // ============================================
 // HOÀN THÀNH PHIẾU NHẬP - CẬP NHẬT TỒN KHO (✅ HỖ TRỢ SẢN PHẨM MỚI)
@@ -366,18 +374,21 @@ function completeImport(index) {
                 console.log(`💰 Cập nhật giá vốn ${product.name}: ${product.importPrice.toLocaleString()}₫ → Giá bán: ${productInAdmin.price.toLocaleString()}₫`);
             }
             localStorage.setItem('bookstore_products', JSON.stringify(products));
-            
             // ✅ 5️⃣ GHI LOG VÀO INVENTORY
-            inventory.push({
+            let logItem = {
                 id: productCode,
                 name: product.name,
                 category: bookCategory,
                 date: order.date,
                 type: "Nhập",
-                quantity: product.quantity
-            });
-            
+                quantity: product.quantity,
+                orderId: order.id
+            };
+            if (!isInventoryEntryExist(inventory, logItem)) {
+                inventory.push(logItem);
+            }
             console.log(`✅ Cộng tồn kho: ${product.name} (${productCode}, ID: ${bookId}) +${product.quantity} → Tổng: ${stockData[bookId]}`);
+            
         });
         
         // ✅ LƯU INVENTORY
@@ -464,9 +475,6 @@ document.addEventListener('DOMContentLoaded', function() {
         displayImportOrders();
     }
 });
-// ============================================
-// TỰ ĐỘNG ĐỒNG BỘ TỒN KHO CHO PHIẾU ĐÃ HOÀN THÀNH
-// ============================================
 
 // ============================================
 // TỰ ĐỘNG ĐỒNG BỘ TỒN KHO CHO PHIẾU ĐÃ HOÀN THÀNH (CHẠY 1 LẦN DUY NHẤT)
@@ -542,15 +550,18 @@ function syncCompletedOrders() {
                     localStorage.setItem('bookstore_stock', JSON.stringify(stockData));
                     
                     // ✅ GHI LOG VÀO INVENTORY
-                    inventory.push({
+                    let logItem = {
                         id: productCode,
                         name: product.name,
-                        category: defaultBook.category,
+                        category: bookCategory,
                         date: order.date,
                         type: "Nhập",
                         quantity: product.quantity,
                         orderId: order.id
-                    });
+                    };
+                    if (!isInventoryEntryExist(inventory, logItem)) {
+                        inventory.push(logItem);
+                    }
                     console.log(`✅ Đã sync: ${product.name} từ ${order.id} → Tồn: ${stockData[bookId]}`);
                 }
             });
@@ -570,8 +581,8 @@ syncCompletedOrders();
 // RESET BỘ LỌC
 // ============================================
 
-function resetFilter() {
-    document.getElementById('importDate').value = '';
-    document.getElementById('importStatus').value = '';
-    displayImportOrders(); // Hiển thị tất cả
-}
+// function resetFilter() {
+//     document.getElementById('importDate').value = '';
+//     document.getElementById('importStatus').value = '';
+//     displayImportOrders(); // Hiển thị tất cả
+// }

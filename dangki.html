@@ -111,7 +111,7 @@
     <div class="form-wrapper hidden" id="register-container">
       <h2>Đăng Kí</h2>
       <div class="error" id="register-error"></div>
-      <input type="text" id="register-username" placeholder="Tên đăng nhập">
+      <input type="text" id="register-username" placeholder="Tên đăng kí">
       <input type="password" id="register-password" placeholder="Mật khẩu">
       <input type="password" id="register-confirm-password" placeholder="Xác nhận mật khẩu">
       <input type="email" id="register-email" placeholder="Email">
@@ -331,18 +331,18 @@
       document.getElementById('login-username').value = '';
       document.getElementById('login-password').value = '';
       
-      // ✅ KIỂM TRA: Nếu là Admin → Chuyển đến trang Admin
-      if (user.role === 'admin' && user.username === 'admin') {
-        localStorage.setItem('adminLoggedIn', 'true');
-        localStorage.setItem('adminInfo', JSON.stringify({
-          username: user.username,
-          name: user.name
-        }));
+      // // ✅ KIỂM TRA: Nếu là Admin → Chuyển đến trang Admin
+      // if (user.role === 'admin' && user.username === 'admin') {
+      //   localStorage.setItem('adminLoggedIn', 'true');
+      //   localStorage.setItem('adminInfo', JSON.stringify({
+      //     username: user.username,
+      //     name: user.name
+      //   }));
         
-        alert('✅ Đăng nhập Admin thành công!\n\nBạn sẽ được chuyển đến trang quản lý...');
-        window.location.href = 'index.html'; // Chuyển đến trang Admin
-        return;
-      }
+      //   alert('✅ Đăng nhập Admin thành công!\n\nBạn sẽ được chuyển đến trang quản lý...');
+      //   window.location.href = 'index.html'; // Chuyển đến trang Admin
+      //   return;
+      // }
       
       // User thường
       if (user.requirePasswordChange === true) {

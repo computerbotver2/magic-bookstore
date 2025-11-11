@@ -362,7 +362,7 @@ function resetCategories() {
 //     products.forEach(product => {
 //         if (product.category === oldName) {
 //             product.category = newName;
-//             updated = true;
+//             updated = true;loadCategories
 //         }
 //     });
 

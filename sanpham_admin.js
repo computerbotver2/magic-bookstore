@@ -452,11 +452,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const isDuplicate = products.some(p =>
                 p.name.toLowerCase() === newProduct.name.toLowerCase() &&
                 p.category.toLowerCase() === newProduct.category.toLowerCase() &&
-                p.author.toLowerCase() === newProduct.author.toLowerCase() &&
-                p.publisher.toLowerCase() === newProduct.publisher.toLowerCase()
+                p.author.toLowerCase() === newProduct.author.toLowerCase() 
             );
             if (isDuplicate) {
-                alert('❌ Đã có sản phẩm này! Vui lòng kiểm tra lại Tên, Thể loại, Tác giả, Nhà xuất bản.');
+                alert('❌ Đã có sản phẩm này! Vui lòng kiểm tra lại Tên, Thể loại, Tác giả.');
                 return; // Không thêm sản phẩm mới nữa
             }
 
