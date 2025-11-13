@@ -15,7 +15,7 @@
         <div class="logo" aria-hidden="true">📘</div>
         <div>
           <div style="font-size:20px">Cửa hàng Sách Việt</div>
-          <div style="font-size:12px;color:rgba(255,255,255,0.85)">Danh sách & tìm kiếm — demo</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.85)">Danh sách & tìm kiếm</div>
         </div>
       </div>
 
@@ -34,19 +34,31 @@
         </a>
       </nav>
       </div>
-    <div class="search-row" style="margin-top:10px;">
-      <input id="qName" type="text" placeholder="Tìm theo tên sách..." />
-      <select id="qCat">
-        <option value="">Tất cả loại</option>
-      </select>
-      <select id="qPub">
-        <option value="">Tất cả NXB</option>
-      </select>
-      <input id="qAuthor" type="text" placeholder="Tìm theo tác giả..." />
-      <input id="qMin" type="number" placeholder="Giá tối thiểu (₫)" min="0" /><input id="qMax" type="number" placeholder="Giá tối đa (₫)" min="0" />
-      <button id="btnSearch">🔎 Tìm kiếm</button>
+      
+    <div class="search-container" style="margin-top:10px;">
+      <div class="basic-search">
+        <input id="qName" type="text" placeholder="Tìm theo tên sách..." />
+        <button id="btnSearch">🔎 Tìm kiếm</button>
+      </div>
+
+      <button id="btnToggleAdvanced" class="btn-advanced-toggle">
+        Tìm kiếm nâng cao <span>▾</span>
+      </button>
+
+      <div class="advanced-search" id="advancedSearchContainer">
+        <select id="qCat">
+          <option value="">Tất cả loại</option>
+        </select>
+        <select id="qPub">
+          <option value="">Tất cả NXB</option>
+        </select>
+        <input id="qMin" type="number" placeholder="Giá tối thiểu (₫)" min="0" />
+        <input id="qMax" type="number" placeholder="Giá tối đa (₫)" min="0" />
+        
+        <button id="btnAdvancedSearch">🔎 Lọc</button>
+      </div>
     </div>
-  </div>
+    </div>
 </header>
 
   <main>

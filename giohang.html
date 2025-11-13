@@ -121,6 +121,32 @@
 </main>
 
 
+<div class="modal-overlay" id="order-confirm-modal">
+  <div class="modal-panel">
+      <h3>Xác nhận Đơn hàng</h3>
+      <p>Vui lòng kiểm tra lại thông tin trước khi xác nhận mua hàng.</p>
+      
+      <div class="order-review">
+        <p><strong>Người nhận:</strong> <span id="order-confirm-name"></span></p>
+        <p><strong>Điện thoại:</strong> <span id="order-confirm-phone"></span></p>
+        <p><strong>Giao đến:</strong> <span id="order-confirm-address"></span></p>
+        
+        <h4>Chi tiết sản phẩm:</h4>
+        <div id="order-confirm-details"></div>
+        
+        <p style="text-align:right;font-size:18px;margin-top:10px;">
+          <strong>Tổng tiền: <span id="order-confirm-total" style="color:var(--primary)"></span></strong>
+        </p>
+      </div>
+      
+      <div style="display: flex; gap: 10px; margin-top: 16px;">
+        <button id="btn-cancel-confirm" class="btn-primary" style="flex: 1; background: #777;">Hủy</button>
+        <button id="btn-final-confirm" class="btn-primary" style="flex: 2;">XÁC NHẬN MUA</button>
+      </div>
+  </div>
+</div>
+
+
 <div class="modal-overlay" id="order-success-modal">
   <div class="modal-panel">
       <h3>Đặt hàng thành công!</h3>

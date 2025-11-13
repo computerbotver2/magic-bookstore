@@ -13,7 +13,7 @@ const books = [
    img:"https://i.pinimg.com/736x/7e/46/f0/7e46f046c4b1bd0e625053087cd9158c.jpg",
    desc:"Những truyện ngắn đầy ấm áp về tuổi thơ và ký ức."},
   {id:5, title:"Dế mèn phiêu lưu ký", author:"Tô Hoài", category:"Thiếu nhi", publisher: "NXB Kim Đồng", price:54000,
-   img:"https://upload.wikimedia.org/wikipedia/commons/9/91/B%C3%ACa_D%E1%BA%BF_M%C3%A8n_Phi%C3%AAu_L%C6%B0u_K%C3%BD_c%E1%BB%A7a_NXB_T%C3%A2n_D%C3%A2n.jpg",
+   img:"https://upload.wikimedia.org/wikipedia/commons/9/91/B%C3%ACa_D%E1%BA%BF_M%C3%A8n_Phi%C3AAu_L%C6%B0u_K%C3%BD_c%E1%BB%A7a_NXB_T%C3%A2n_D%C3%A2n.jpg",
    desc:"Tác phẩm thiếu nhi kinh điển, nhiều bài học nhân văn sâu sắc."},
   {id:6, title:"Tuổi thơ dữ dội", author:"Phùng Quán", category:"Văn học", publisher: "NXB Trẻ", price:99000,
    img:"https://i.pinimg.com/1200x/ce/a4/21/cea421166a7265a3edaf6ff1cee84318.jpg",
@@ -214,7 +214,7 @@ const publishers = Array.from(new Set(allBooks.map(b => b.publisher))).sort();
 const qName = document.getElementById('qName');
 const qCat = document.getElementById('qCat');
 const qPub = document.getElementById('qPub'); 
-const qAuthor = document.getElementById('qAuthor');
+// ❌ ĐÃ XÓA QAUTHOR
 const qMin = document.getElementById('qMin');
 const qMax = document.getElementById('qMax');
 const btnSearch = document.getElementById('btnSearch');
@@ -381,12 +381,14 @@ function renderPagination(){
   pagination.appendChild(next);
 }
 
-/* ===== Search ===== */
+/* ============================================ */
+/* ===== ✅ HÀM TÌM KIẾM ĐÃ SỬA ===== */
+/* ============================================ */
 function doSearch(){
   const name = (qName.value || "").trim().toLowerCase();
   const cat = (qCat.value || "").trim();
   const pub = (qPub.value || "").trim(); 
-  const author = (qAuthor.value || "").trim().toLowerCase(); 
+  // ❌ ĐÃ XÓA TÁC GIẢ
   const min = parseFloat(qMin.value) || 0;
   const max = (qMax.value!=='') ? parseFloat(qMax.value) : Infinity;
 
@@ -394,10 +396,10 @@ function doSearch(){
     const byName = !name || b.title.toLowerCase().includes(name);
     const byCat = !cat || b.category === cat;
     const byPub = !pub || b.publisher === pub; 
-    const byAuthor = !author || b.author.toLowerCase().includes(author); 
+    // ❌ ĐÃ XÓA TÁC GIẢ
     const byPrice = (b.price >= min && b.price <= max);
     
-    return byName && byCat && byPub && byAuthor && byPrice; 
+    return byName && byCat && byPub && byPrice; // ❌ ĐÃ XÓA byAuthor
   });
 
   currentPage = 1;
@@ -531,14 +533,38 @@ function getStockQuantity(bookId) {
 /* ===== Utils ===== */
 function numberWithCommas(x){ return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
 
-/* ===== Init ===== */
+/* ============================================ */
+/* ===== ✅ INIT (ĐÃ THÊM LOGIC TOGGLE) ===== */
+/* ============================================ */
 initCategories();
 initPublishers(); 
 renderGrid();
 
 btnSearch.addEventListener('click', doSearch);
 qName.addEventListener('keyup', (e)=>{ if(e.key==='Enter') doSearch(); });
-qAuthor.addEventListener('keyup', (e)=>{ if(e.key==='Enter') doSearch(); });
+// ❌ ĐÃ XÓA LISTENER CỦA QAUTHOR
+
+// ✅ THÊM LOGIC CHO NÚT LỌC NÂNG CAO (MỚI)
+const btnAdvancedSearch = document.getElementById('btnAdvancedSearch');
+if (btnAdvancedSearch) {
+    btnAdvancedSearch.addEventListener('click', doSearch);
+}
+
+// ✅ THÊM LOGIC CHO NÚT TÌM KIẾM NÂNG CAO
+const btnToggleAdvanced = document.getElementById('btnToggleAdvanced');
+const advancedSearchContainer = document.getElementById('advancedSearchContainer');
+
+if (btnToggleAdvanced && advancedSearchContainer) {
+    btnToggleAdvanced.addEventListener('click', () => {
+        const isActive = advancedSearchContainer.classList.toggle('active');
+        const arrow = btnToggleAdvanced.querySelector('span');
+        if (arrow) {
+            arrow.textContent = isActive ? '▴' : '▾';
+            arrow.style.transform = isActive ? 'rotate(180deg)' : 'rotate(0deg)';
+        }
+    });
+}
+
 
 document.addEventListener('keydown', (e)=>{
   if(e.key === 'Escape') { modal.style.display='none'; modal.setAttribute('aria-hidden','true'); }
@@ -591,7 +617,7 @@ function refreshFromAdmin() {
     const name = (qName.value || "").trim().toLowerCase();
     const cat = (qCat.value || "").trim();
     const pub = (qPub.value || "").trim();
-    const author = (qAuthor.value || "").trim().toLowerCase();
+    // ❌ ĐÃ XÓA TÁC GIẢ
     const min = parseFloat(qMin.value) || 0;
     const max = (qMax.value !== '') ? parseFloat(qMax.value) : Infinity;
 
@@ -599,9 +625,9 @@ function refreshFromAdmin() {
         const byName = !name || b.title.toLowerCase().includes(name);
         const byCat = !cat || b.category === cat;
         const byPub = !pub || b.publisher === pub;
-        const byAuthor = !author || b.author.toLowerCase().includes(author);
+        // ❌ ĐÃ XÓA TÁC GIẢ
         const byPrice = (b.price >= min && b.price <= max);
-        return byName && byCat && byPub && byAuthor && byPrice;
+        return byName && byCat && byPub && byPrice; // ❌ ĐÃ XÓA byAuthor
     });
     
     // ✅ Reset về trang 1 nếu sản phẩm bị ẩn
@@ -664,10 +690,10 @@ function refreshFromAdmin() {
     console.log(`✅ Đã cập nhật: ${allBooks.length} sách, ${filtered.length} hiển thị`);
 }
 
-// Tự động refresh mỗi 5s
-setInterval(refreshFromAdmin, 5000);
+// ❌ ĐÃ XÓA BỎ LỆNH HẸN GIỜ GÂY KHÓ CHỊU
+// setInterval(refreshFromAdmin, 5000); 
 
-// Lắng nghe storage event
+// Lắng nghe storage event (Vẫn giữ lại, cái này tốt cho việc đồng bộ)
 window.addEventListener('storage', (e) => {
     if (e.key === 'bookstore_products' || e.key === 'categories') {
         console.log('📢 Admin đã thay đổi:', e.key);

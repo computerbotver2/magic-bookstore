@@ -25,7 +25,7 @@ const infoAddress = document.getElementById('info-address');
 // DOM Refs cho Nút Đặt Hàng
 const btnPlaceOrder = document.getElementById('btn-place-order');
 
-// DOM Refs cho Modal "Xem Lại"
+// DOM Refs cho Modal "Xem Lại" (Thành công)
 const orderSuccessModal = document.getElementById('order-success-modal');
 const closeSuccessModal = document.getElementById('close-success-modal');
 const orderIdSpan = document.getElementById('order-id');
@@ -35,6 +35,16 @@ const orderAddressSpan = document.getElementById('order-address');
 const orderDetailsSummary = document.getElementById('order-details-summary');
 const orderTotalSpan = document.getElementById('order-total');
 
+// ✅ DOM Refs cho Modal "Xác Nhận" (MỚI)
+const orderConfirmModal = document.getElementById('order-confirm-modal');
+const btnCancelConfirm = document.getElementById('btn-cancel-confirm');
+const btnFinalConfirm = document.getElementById('btn-final-confirm');
+const confirmNameSpan = document.getElementById('order-confirm-name');
+const confirmPhoneSpan = document.getElementById('order-confirm-phone');
+const confirmAddressSpan = document.getElementById('order-confirm-address');
+const confirmDetailsSummary = document.getElementById('order-confirm-details');
+const confirmTotalSpan = document.getElementById('order-confirm-total');
+
 
 /* ==== HÀM (FUNCTIONS) ==== */
 
@@ -43,7 +53,7 @@ function numberWithCommas(x) {
 }
 
 /**
- * Tải giỏ hàng VÀ thông tin user (CẬP NHẬT)
+ * Tải giỏ hàng VÀ thông tin user (Giữ nguyên)
  */
 function loadCart() {
   const loggedInUserJSON = sessionStorage.getItem('currentUser');
@@ -230,10 +240,10 @@ function handleCartClick(event) {
   }
 }
 
-/**
- * ==== HÀM MỚI: Xử lý đặt hàng (CẬP NHẬT) ====
- */
-function placeOrder() {
+// ================================================
+// === ✅ HÀM (MỚI): HIỂN THỊ MODAL XÁC NHẬN
+// ================================================
+function showConfirmModal() {
   if (!currentUser) {
     alert("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
     window.location.href = 'dangki.html';
@@ -246,41 +256,67 @@ function placeOrder() {
   
   let shippingInfo = {};
   
-  // *** CẬP NHẬT: Lấy thông tin giao hàng dựa trên lựa chọn ***
+  // 1. Lấy thông tin giao hàng dựa trên lựa chọn
   if (radioUseSaved.checked) {
-    // 1. Lấy từ địa chỉ đã lưu
     shippingInfo = {
       name: currentUser.username,
       phone: currentUser.phone,
       address: currentUser.address
     };
   } else {
-    // 2. Lấy từ form địa chỉ mới
     shippingInfo = {
       name: infoName.value.trim(),
       phone: infoPhone.value.trim(),
       address: infoAddress.value.trim()
     };
     
-    // 3. Validate form mới
+    // 2. Validate form mới
     if (!shippingInfo.name || !shippingInfo.phone || !shippingInfo.address) {
       alert("Vui lòng điền đầy đủ Tên, Số điện thoại và Địa chỉ giao hàng mới.");
       return;
     }
   }
 
-  // Lấy phương thức thanh toán
+  // 3. Lấy thông tin thanh toán và tổng tiền
   const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
   const totalAmount = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
 
-  // Tạo đối tượng Đơn Hàng Mới
+  // 4. Đổ dữ liệu vào Modal Xác Nhận
+  confirmNameSpan.textContent = shippingInfo.name;
+  confirmPhoneSpan.textContent = shippingInfo.phone;
+  confirmAddressSpan.textContent = shippingInfo.address;
+  confirmTotalSpan.textContent = numberWithCommas(totalAmount) + 'đ';
+  
+  confirmDetailsSummary.innerHTML = cart.map(item => 
+    `<div>${item.title} <strong>(x${item.quantity})</strong></div>`
+  ).join('');
+
+  // 5. Hiển thị Modal Xác Nhận
+  orderConfirmModal.style.display = 'flex';
+
+  // 6. Gán sự kiện cho nút "XÁC NHẬN MUA" (cuối cùng)
+  // Dùng .onclick để đảm bảo ghi đè sự kiện cũ (nếu có)
+  btnFinalConfirm.onclick = () => {
+    // Ẩn modal xác nhận
+    orderConfirmModal.style.display = 'none';
+    
+    // Gọi hàm thực thi đặt hàng
+    executePlaceOrder(shippingInfo, totalAmount, paymentMethod);
+  };
+}
+
+// ================================================
+// === ✅ HÀM (ĐÃ SỬA): CHỈ THỰC THI ĐẶT HÀNG
+// ================================================
+function executePlaceOrder(shippingInfo, totalAmount, paymentMethod) {
+  // Logic tạo đơn hàng (đã được di chuyển từ hàm placeOrder cũ)
   const newOrder = {
     id: 'DH' + Date.now(),
     date: new Date().toISOString(),
     items: [...cart], 
     total: totalAmount,
     paymentMethod: paymentMethod === 'cod' ? 'Thanh toán khi nhận hàng' : 'Thanh toán trực tuyến',
-    shippingAddress: shippingInfo // Sử dụng đối tượng shippingInfo
+    shippingAddress: shippingInfo 
   };
 
   // Lưu đơn hàng vào user
@@ -296,7 +332,7 @@ function placeOrder() {
   // Lưu thay đổi vào Storage
   saveCartAndUser();
 
-  // Hiển thị Modal "Xem Lại"
+  // Hiển thị Modal "Thành Công"
   orderIdSpan.textContent = newOrder.id;
   orderNameSpan.textContent = newOrder.shippingAddress.name;
   orderPhoneSpan.textContent = newOrder.shippingAddress.phone;
@@ -322,15 +358,22 @@ document.addEventListener('DOMContentLoaded', () => {
   // Listener cho danh sách sản phẩm
   cartItemsList.addEventListener('click', handleCartClick);
 
-  // Listener cho nút ĐẶT HÀNG
+  // ✅ Listener cho nút ĐẶT HÀNG (đã thay đổi)
   if (btnPlaceOrder) {
-    btnPlaceOrder.addEventListener('click', placeOrder);
+    btnPlaceOrder.addEventListener('click', showConfirmModal); // Gọi hàm hiển thị modal
   }
   
-  // Listener cho nút Đóng Modal "Xem Lại"
+  // Listener cho nút Đóng Modal "Thành Công"
   if (closeSuccessModal) {
     closeSuccessModal.addEventListener('click', () => {
       orderSuccessModal.style.display = 'none';
+    });
+  }
+  
+  // ✅ (MỚI) Listener cho nút Hủy trên Modal Xác Nhận
+  if (btnCancelConfirm) {
+    btnCancelConfirm.addEventListener('click', () => {
+      orderConfirmModal.style.display = 'none';
     });
   }
   

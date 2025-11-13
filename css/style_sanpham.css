@@ -25,27 +25,102 @@
     box-shadow: 0 6px 20px rgba(0,0,0,0.06);
   }
 
-  /* CSS cho thanh tìm kiếm (đã cân đối) */
-  .search-row{
-    display:flex; gap:12px; align-items:center; margin-top:14px;
-    flex-wrap:wrap; justify-content:center;
+  /* ============================================ */
+  /* === ✅ CSS TÌM KIẾM ĐÃ SỬA === */
+  /* ============================================ */
+  .search-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 14px;
   }
-  .search-row input[type="text"], 
-  .search-row select, 
-  .search-row input[type="number"]{
-    padding:10px 12px; border-radius:8px; border:0;
+
+  /* 1. Thanh tìm kiếm cơ bản */
+  .basic-search {
+    display: flex;
+    gap: 12px;
+  }
+  .basic-search input[type="text"] {
+    flex-grow: 1; /* Input chiếm phần lớn */
+    padding: 10px 12px; 
+    border-radius: 8px; 
+    border: 0;
     box-shadow: 0 4px 14px rgba(14,30,60,0.06);
-    flex: 1 1 auto; min-width: 140px; 
   }
-  .search-row input[type="text"] { flex-grow: 1; flex-basis: 180px; }
-  .search-row select { flex-grow: 1; flex-basis: 160px; }
-  .search-row input[type="number"] { flex-grow: 1; flex-basis: 140px; max-width: 150px; }
-  .search-row button { flex-shrink: 0; }
-  .search-row button{
-    padding:10px 16px;border-radius:8px;border:0;background:#2ecc71;color:white;cursor:pointer;font-weight:600;
+  .basic-search button {
+    flex-shrink: 0; /* Nút không bị co lại */
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: 0;
+    background: #2ecc71;
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
     box-shadow: 0 6px 18px rgba(0,0,0,0.08);
   }
-  .search-row button:hover{opacity:0.95}
+  .basic-search button:hover { opacity: 0.95; }
+
+  /* 2. Nút bật/tắt nâng cao */
+  .btn-advanced-toggle {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+    padding: 0;
+    font-size: 14px;
+    align-self: flex-start;
+  }
+  .btn-advanced-toggle:hover { color: white; }
+  .btn-advanced-toggle span { display: inline-block; transition: transform 0.2s; }
+
+  /* 3. Khung tìm kiếm nâng cao */
+  .advanced-search {
+    display: none; /* Ẩn mặc định */
+    flex-wrap: wrap;
+    gap: 12px;
+    background: rgba(0, 0, 0, 0.1);
+    padding: 12px;
+    border-radius: 8px;
+    animation: fadeIn 0.3s;
+  }
+  .advanced-search.active {
+    display: flex; /* Hiện khi có class 'active' */
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .advanced-search input[type="text"], 
+  .advanced-search select, 
+  .advanced-search input[type="number"]{
+    padding: 10px 12px; 
+    border-radius: 8px; 
+    border: 0;
+    box-shadow: 0 4px 14px rgba(14,30,60,0.06);
+    flex: 1 1 auto; 
+    min-width: 140px; 
+  }
+  .advanced-search select { flex-grow: 1; flex-basis: 160px; }
+  .advanced-search input[type="number"] { flex-grow: 1; flex-basis: 140px; max-width: 150px; }
+
+  /* === ✅ CSS CHO NÚT LỌC MỚI === */
+  .advanced-search button {
+    flex-shrink: 0;
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: 0;
+    background: #2ecc71; /* Giống nút tìm kiếm chính */
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  }
+  .advanced-search button:hover { opacity: 0.95; }
+  /* ============================================ */
+
   
   /* Main */
   main{padding:28px 0}
@@ -175,10 +250,17 @@
     .product-grid{ grid-template-columns:repeat(2, 1fr); }
   }
   @media (max-width:520px){
-    .search-row input[type="text"], .search-row select, .search-row input[type="number"]{min-width:100%}
+    /* .search-row input[type="text"], .search-row select, .search-row input[type="number"]{min-width:100%} */
     .brand{justify-content:center}
     .cover{height:200px}
     .product-grid{ grid-template-columns: 1fr; }
+    
+    .advanced-search input[type="text"], 
+    .advanced-search select, 
+    .advanced-search input[type="number"],
+    .advanced-search button { /* === ✅ ĐÃ THÊM NÚT VÀO ĐÂY === */
+      min-width: 100%;
+    }
   }
   /* small polish */
   .muted-small{color:var(--muted);font-size:13px}
