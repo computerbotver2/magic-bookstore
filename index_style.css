@@ -384,9 +384,9 @@ body {
     color: var(--danger);
 }
 
-.btn-icon.view {
+.btn-icon.finish {
     background: #e0f2fe;
-    color: var(--info);
+    color: var(--info)
 }
 
 .btn-icon.toggle {
@@ -801,3 +801,211 @@ body.page-active .menu-container {
         height: 60px;
     }
 }
+/* Bảng phiếu nhập modal - Đơn giản, gọn */
+#importProductsTable {
+    margin: 0;
+}
+
+#importProductsTable th, #importProductsTable td {
+    font-size: 14px;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+/* Ô nhập gọn hơn */
+#importProductsTable td:nth-child(1) {
+    width: 250px;
+    min-width: 36px;
+    padding: 6px;
+}
+#importProductsTable td:nth-child(2) input[type="number"] {
+    width: 60px;
+    min-width: 36px;
+    padding: 6px;
+}
+#importProductsTable td:nth-child(3) input[type="number"] {
+    width: 100px;
+    min-width: 36px;
+    padding: 6px;
+}
+
+#importProductsTable input, #importProductsTable select {
+    font-size: 14px;
+    padding: 6px 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+#importProductsTable .delete-row-btn {
+    background: #ef4444;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 9px;
+    cursor: pointer;
+    font-size: 15px;
+}
+#importProductsTable .delete-row-btn:hover { background: #b91c1c; }
+
+.error { color: #e74c3c; font-size: 13px; margin-top: 5px; }
+/* ============================================ */
+/* NÚT ICON CHI TIẾT - GIỐNG STYLE CŨ */
+/* ============================================ */
+.btn-icon.view {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: white;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+}
+
+.btn-icon.view:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+}
+
+.btn-icon.view i {
+    font-size: 20px;
+}
+
+.btn-icon.view:active {
+    transform: translateY(0);
+}
+
+/* ============================================ */
+/* MODAL CHI TIẾT ĐƠN HÀNG */
+/* ============================================ */
+.order-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+}
+
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+}
+
+.modal-panel {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 700px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -48%);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+.modal-close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: #f1f5f9;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    z-index: 1;
+}
+
+.modal-close-btn:hover {
+    background: #e2e8f0;
+    transform: rotate(90deg);
+}
+
+.modal-close-btn i {
+    font-size: 24px;
+    color: #475569;
+}
+
+.modal-content-wrapper {
+    padding: 30px;
+}
+
+/* Nút trong modal */
+.btn-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+}
+
+.btn-primary i,
+.btn-danger i {
+    font-size: 18px;
+}
+

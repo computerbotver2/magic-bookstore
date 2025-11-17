@@ -79,7 +79,7 @@ const statusClass = {
 };
 
 // ============================================
-// HIỂN THỊ DANH SÁCH ĐƠN HÀNG
+// HIỂN THỊ DANH SÁCH ĐƠN HÀNG - CHỈ 1 NÚT CHI TIẾT
 // ============================================
 function displayOrders(filteredOrders = orders) {
     let html = '';
@@ -88,40 +88,6 @@ function displayOrders(filteredOrders = orders) {
         html = '<tr><td colspan="6" style="text-align:center;padding:40px;color:#999;">Chưa có đơn hàng nào</td></tr>';
     } else {
         filteredOrders.forEach((order, index) => {
-            let actionButtons = '';
-            
-            // ✅ LOGIC NÚT THAO TÁC THEO TRẠNG THÁI
-            switch(order.status) {
-                case 'pending':
-                    actionButtons = `
-                        <button class="btn-icon edit" onclick="processOrder('${order.id}')" title="Xác nhận xử lý">
-                            <i class='bx bx-check-circle'></i>
-                        </button>
-                        <button class="btn-icon delete" onclick="cancelOrderByAdmin('${order.id}')" title="Hủy đơn">
-                            <i class='bx bx-x-circle'></i>
-                        </button>
-                    `;
-                    break;
-                    
-                case 'processing':
-                    actionButtons = `
-                        <button class="btn-icon edit" onclick="shipOrder('${order.id}')" title="Đã giao hàng">
-                            <i class='bx bx-package'></i>
-                        </button>
-                        <button class="btn-icon delete" onclick="cancelOrderByAdmin('${order.id}')" title="Hủy đơn">
-                            <i class='bx bx-x-circle'></i>
-                        </button>
-                    `;
-                    break;
-                    
-                case 'shipped':
-                case 'completed':
-                case 'cancelled':
-                    actionButtons = '<span style="color:#999; font-size:13px;">Không thể thao tác</span>';
-                    break;
-            }
-            
-            // ✅ ĐẢM BẢO LUÔN CÓ TEXT HIỂN THỊ
             const statusDisplay = statusText[order.status] || order.status;
             
             html += `<tr>`;
@@ -132,10 +98,9 @@ function displayOrders(filteredOrders = orders) {
             html += `<td><span class="badge ${statusClass[order.status]}">${statusDisplay}</span></td>`;
             html += `<td>
                         <div class="action-btns">
-                            <button class="btn-icon view" onclick="viewOrderDetail('${order.id}')" title="Xem chi tiết">
-                                <i class='bx bx-show'></i>
-                            </button>
-                            ${actionButtons}
+            <button class="btn-icon view" onclick="openOrderDetailModal('${order.id}')" title="Xem chi tiết & Thao tác">
+                <i class='bx bx-show'></i>    <!-- ✅ ĐÚNG: icon mắt -->
+            </button>
                         </div>
                      </td>`;
             html += `</tr>`;
@@ -147,7 +112,6 @@ function displayOrders(filteredOrders = orders) {
         table.innerHTML = html;
     }
 }
-
 // ============================================
 // XỬ LÝ ĐƠN HÀNG (ADMIN)
 // ============================================
@@ -260,42 +224,206 @@ function cancelOrderByAdmin(orderId) {
 }
 
 // ============================================
-// XEM CHI TIẾT ĐƠN HÀNG
+// MỞ POPUP CHI TIẾT ĐƠN HÀNG
 // ============================================
-function viewOrderDetail(orderId) {
+function openOrderDetailModal(orderId) {
     const order = orders.find(o => o.id === orderId);
     
-    if (order) {
-        let itemsText = '';
-        if (order.items && order.items.length > 0) {
-            order.items.forEach(item => {
-                itemsText += `\n• ${item.title} x${item.quantity} - ${item.price.toLocaleString()}₫`;
-            });
-        }
-        
-        let addressText = 'Chưa cập nhật';
-        if (order.shippingAddress) {
-            addressText = `${order.shippingAddress.name}\n${order.shippingAddress.phone}\n${order.shippingAddress.address}`;
-        }
-        
-        let cancelInfo = '';
-        if (order.status === 'cancelled') {
-            cancelInfo = `\n\n❌ Đã hủy bởi: ${order.cancelledBy === 'admin' ? 'Admin' : 'Khách hàng'}\nThời gian: ${new Date(order.cancelledAt).toLocaleString('vi-VN')}`;
-        }
-        
-        alert(`📦 Chi tiết đơn hàng\n\n` +
-              `Mã đơn: ${order.id}\n` +
-              `Khách hàng: ${order.customer}\n` +
-              `Ngày đặt: ${new Date(order.date).toLocaleString('vi-VN')}\n` +
-              `Tổng tiền: ${order.total.toLocaleString()}₫\n` +
-              `Trạng thái: ${statusText[order.status]}\n\n` +
-              `📍 Địa chỉ giao hàng:\n${addressText}\n\n` +
-              `💳 Thanh toán: ${order.paymentMethod || 'Chưa rõ'}\n\n` +
-              `📋 Sản phẩm:${itemsText}` +
-              cancelInfo
-        );
-    } else {
+    if (!order) {
         alert("❌ Không tìm thấy đơn hàng!");
+        return;
+    }
+    
+    // Tạo HTML cho danh sách sản phẩm
+    let itemsHtml = '';
+    if (order.items && order.items.length > 0) {
+        order.items.forEach(item => {
+            itemsHtml += `
+                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0;">
+                    <span>${item.title}</span>
+                    <span style="color: #666;">x${item.quantity} - ${item.price.toLocaleString()}₫</span>
+                </div>
+            `;
+        });
+    }
+    
+    // Địa chỉ giao hàng
+    let addressHtml = 'Chưa cập nhật';
+    if (order.shippingAddress) {
+        addressHtml = `
+            <strong>${order.shippingAddress.name}</strong><br>
+            📞 ${order.shippingAddress.phone}<br>
+            📍 ${order.shippingAddress.address}
+        `;
+    }
+    
+    // Thông tin hủy đơn (nếu có)
+    let cancelInfo = '';
+    if (order.status === 'cancelled') {
+        cancelInfo = `
+            <div style="background: #fee2e2; padding: 12px; border-radius: 8px; margin-top: 15px; border-left: 4px solid #ef4444;">
+                <strong style="color: #dc2626;">❌ Đơn hàng đã bị hủy</strong><br>
+                <span style="font-size: 13px; color: #991b1b;">
+                    Bởi: ${order.cancelledBy === 'admin' ? 'Admin' : 'Khách hàng'}<br>
+                    Thời gian: ${new Date(order.cancelledAt).toLocaleString('vi-VN')}
+                </span>
+            </div>
+        `;
+    }
+    
+    // Các nút hành động theo trạng thái
+    let actionButtons = '';
+    
+    switch(order.status) {
+        case 'pending':
+            actionButtons = `
+                <button class="btn btn-primary" onclick="processOrderFromModal('${order.id}')" style="flex: 1;">
+                    <i class='bx bx-check-circle'></i> Xác nhận xử lý
+                </button>
+                <button class="btn btn-danger" onclick="cancelOrderFromModal('${order.id}')" style="flex: 1;">
+                    <i class='bx bx-x-circle'></i> Hủy đơn
+                </button>
+            `;
+            break;
+            
+        case 'processing':
+            actionButtons = `
+                <button class="btn btn-primary" onclick="shipOrderFromModal('${order.id}')" style="flex: 1;">
+                    <i class='bx bx-package'></i> Đã giao hàng
+                </button>
+                <button class="btn btn-danger" onclick="cancelOrderFromModal('${order.id}')" style="flex: 1;">
+                    <i class='bx bx-x-circle'></i> Hủy đơn
+                </button>
+            `;
+            break;
+            
+        case 'shipped':
+        case 'completed':
+        case 'cancelled':
+            actionButtons = `
+                <div style="text-align: center; padding: 15px; color: #999; font-size: 14px;">
+                    🔒 Không thể thao tác với đơn hàng này
+                </div>
+            `;
+            break;
+    }
+    
+    // Tạo nội dung modal
+    const modalContent = `
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 20px;">
+            <div>
+                <h2 style="margin: 0; color: #1e293b; font-size: 24px;">📦 Chi tiết đơn hàng</h2>
+                <p style="margin: 5px 0 0 0; color: #64748b; font-size: 14px;">Mã đơn: <strong>${order.id}</strong></p>
+            </div>
+            <span class="badge ${statusClass[order.status]}" style="font-size: 14px; padding: 8px 16px;">
+                ${statusText[order.status]}
+            </span>
+        </div>
+        
+        <div style="background: #f8fafc; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 10px;">
+                <div>
+                    <p style="margin: 0; color: #64748b; font-size: 13px;">👤 Khách hàng</p>
+                    <p style="margin: 5px 0 0 0; font-weight: 600; color: #1e293b;">${order.customer}</p>
+                </div>
+                <div>
+                    <p style="margin: 0; color: #64748b; font-size: 13px;">📅 Ngày đặt</p>
+                    <p style="margin: 5px 0 0 0; font-weight: 600; color: #1e293b;">${new Date(order.date).toLocaleString('vi-VN')}</p>
+                </div>
+            </div>
+            <div>
+                <p style="margin: 0; color: #64748b; font-size: 13px;">📍 Địa chỉ giao hàng</p>
+                <p style="margin: 5px 0 0 0; font-size: 14px; line-height: 1.6; color: #475569;">${addressHtml}</p>
+            </div>
+            <div style="margin-top: 10px;">
+                <p style="margin: 0; color: #64748b; font-size: 13px;">💳 Thanh toán</p>
+                <p style="margin: 5px 0 0 0; font-weight: 600; color: #1e293b;">${order.paymentMethod || 'Chưa rõ'}</p>
+            </div>
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+            <p style="margin: 0 0 10px 0; font-weight: 600; color: #1e293b; font-size: 15px;">📋 Sản phẩm</p>
+            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px;">
+                ${itemsHtml}
+                <div style="display: flex; justify-content: space-between; padding: 12px 0 0 0; margin-top: 10px; border-top: 2px solid #e2e8f0;">
+                    <strong style="color: #1e293b;">Tổng cộng:</strong>
+                    <strong style="color: #2563eb; font-size: 18px;">${order.total.toLocaleString()}₫</strong>
+                </div>
+            </div>
+        </div>
+        
+        ${cancelInfo}
+        
+        <div style="display: flex; gap: 10px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
+            ${actionButtons}
+        </div>
+    `;
+    
+    // Hiển thị modal
+    showModal('orderDetailModal', modalContent);
+}
+
+// ============================================
+// XỬ LÝ TỪ MODAL
+// ============================================
+function processOrderFromModal(orderId) {
+    if (confirm('✅ Xác nhận XỬ LÝ đơn hàng này?')) {
+        saveOrderStatus(orderId, 'processing');
+        orders = loadOrdersFromUsers();
+        closeModal('orderDetailModal');
+        displayOrders();
+        alert('✅ Đã chuyển đơn sang trạng thái "Đã xử lý"');
+    }
+}
+
+function shipOrderFromModal(orderId) {
+    closeModal('orderDetailModal');
+    shipOrder(orderId); // Sử dụng hàm shipOrder() có sẵn
+}
+
+function cancelOrderFromModal(orderId) {
+    if (confirm('❌ Bạn có chắc muốn HỦY đơn hàng này?\n\n⚠️ User sẽ nhận được thông báo!')) {
+        saveOrderStatus(orderId, 'cancelled', 'admin');
+        orders = loadOrdersFromUsers();
+        closeModal('orderDetailModal');
+        displayOrders();
+        alert('✅ Đã hủy đơn hàng!\n\n👉 User sẽ thấy thông báo "Admin đã hủy đơn hàng"');
+    }
+}
+
+// ============================================
+// HÀM HIỂN THỊ/ĐÓNG MODAL CHUNG
+// ============================================
+function showModal(modalId, content) {
+    // Tạo modal nếu chưa có
+    let modal = document.getElementById(modalId);
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = modalId;
+        modal.className = 'order-modal';
+        modal.innerHTML = `
+            <div class="modal-overlay" onclick="closeModal('${modalId}')"></div>
+            <div class="modal-panel">
+                <button class="modal-close-btn" onclick="closeModal('${modalId}')" title="Đóng">
+                    <i class='bx bx-x'></i>
+                </button>
+                <div class="modal-content-wrapper"></div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    
+    // Cập nhật nội dung
+    modal.querySelector('.modal-content-wrapper').innerHTML = content;
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
     }
 }
 
